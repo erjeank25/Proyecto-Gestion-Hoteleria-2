@@ -181,11 +181,82 @@ class ListaHabitaciones:
                 return
             nodo_actual = nodo_actual.siguiente
 
+
+
+class Reservaciones:
+    def __init__(self, archivo_csv):
+        self.archivo_csv = archivo_csv
+    
+    def cargar_datos(self):
+        datos = []
+        fila_ordenada = []
+        with open(self.archivo_csv, 'r', newline='') as archivo:
+            lector_csv = csv.reader(archivo,delimiter=";")
+            next(lector_csv)
+            for fila in lector_csv:
+                fila_ordenada.append(fila[0])
+                fila_ordenada.append(fila[1])
+                fila_ordenada.append(fila[2])
+                fila_ordenada.append(fila[3])
+                fila_ordenada.append(fila[4])
+                fila_ordenada.append(fila[5])
+                fila_ordenada.append(fila[6])
+                fila_ordenada.append(fila[7])
+                fila_ordenada.append(fila[8])
+                fila_ordenada.append(fila[9])
+                fila_ordenada.append(fila[10])
+                fila_ordenada.append(fila[11])
+                datos.append(fila)
+        return datos
+    
+
+
+class NodoCola:
+    def __init__(self, vector):
+        self.vector = vector
+        self.siguiente = None
+
+class ColaConVectores:
+    def __init__(self):
+        self.front = None  # Puntero al frente de la cola
+        self.final = None   # Puntero al final de la cola
+
+    
+
+    def esta_vacia(self):
+        return self.front is None
+
+    def encolar(self, vector):
+        nuevo_nodo = NodoCola(vector)
+        if self.esta_vacia():
+            self.front = self.final = nuevo_nodo
+        else:
+            self.final.siguiente = nuevo_nodo
+            self.final = nuevo_nodo
+
+    def eliminar(self):
+        if self.esta_vacia():
+            return None
+        vector = self.front.vector
+        self.front = self.front.siguiente
+        if self.front is None:
+            self.final = None
+        return vector
+
+    def imprimir(self):
+        nodo_actual = self.front
+        while nodo_actual:
+            print(nodo_actual.vector)
+            nodo_actual = nodo_actual.siguiente
+
+
 def main():
 
     archivo = 'hoteles.csv'
+    
     lista_hoteles = ListaHoteles() #instanciacion de un objeto de ListaHoteles()
     lista_hoteles.cargar_csv(archivo) #lectura del archivo.csv
+    
 
     opcion = 0
     opcion_2 = 0
@@ -324,7 +395,25 @@ def main():
                 elif opcion_2 == 6:
                     break
         elif opcion == 2:
-            print()
+            print("")
+            print("Opcion seleccionada: Gestion de Reservaciones")
+            print("Solo esta disponible por el momento valencia")
+            print("")
+            print("Seleccione una opcion:")
+            print("Crear reservacion")
+            print("Modificar reservacion")
+            print("Listar reservaciones")
+            print("Eliminar reservacion")
+            accion = int(input("Aca: "))
+            if accion == 3:
+                print("")
+                archivo_reservaciones = 'reservaciones_valencia.csv'
+                lista_reservas = Reservaciones(archivo_reservaciones)
+                database = lista_reservas.cargar_datos()
+                for i in range(len(database)):
+                    for j in range(len(database[0])):
+                        print(database[i][j]," ",end="")
+                    print("")
         elif opcion == 3:
             print()
         elif opcion == 4:
