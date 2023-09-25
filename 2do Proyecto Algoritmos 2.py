@@ -42,8 +42,7 @@ class ListaHoteles:
     def agregar(self, nombre, direccion, telefono, habitaciones_disponibles, nro_reservas):
 
         nuevo_hotel = Hotel(nombre, direccion, telefono, habitaciones_disponibles, nro_reservas)
-        habitaciones_hotel = ListaHabitaciones() #se crea instancia de ListaHabitaciones() para hacer un nuevo archivo csv
-
+        
         with open(f'habitaciones_{nombre.lower()}.csv','w',newline='') as nuevo_csv: #creacion del nuevo archivo de habitaciones
             escritor = csv.writer(nuevo_csv,delimiter=';')
             escritor.writerow(['Numero Habitaciones', 'Disponibilidad']) #encabezados de habitaciones
@@ -54,11 +53,11 @@ class ListaHoteles:
             for i in range(habitaciones_disponibles + 1, habitaciones_disponibles + nro_reservas + 1):
                 escritor.writerow([i, 'No Disponible'])
 
-        with open(f'reservaciones_{nombre.lower()}.csv','w',newline='') as nuevo_csv: #creacion del nuevo archivo de reservas
+        """with open(f'reservaciones_{nombre.lower()}.csv','w',newline='') as nuevo_csv: #creacion del nuevo archivo de reservas
             escritor = csv.writer(nuevo_csv, delimiter=';')
             escritor.writerow(['Nombre', 'Fecha Reserva', 'Fecha Entrada', 'Fecha Salida', 'Nro Habitacion', #encabezados de reservas
                                'Duracion Estadia', 'Tipo Habitacion', 'Nro Personas', 'Telefono', 'Contacto', 
-                               'Precio Total', 'ID'])
+                               'Precio Total', 'ID'])"""
 
         nuevo_hotel.habitaciones_disponibles = habitaciones_disponibles        
         
@@ -219,11 +218,10 @@ class Reservaciones:
             lector_csv = csv.reader(archivo,delimiter=";")
             next(lector_csv)
             for fila in lector_csv:
-                reservacion = Reservacion(*fila)
+                reservacion = None
+                reservacion = Reservacion(fila[0], fila[1], fila[2], fila[3], fila[4], fila[5], fila[6], fila[7], fila[8], fila[9], fila[10],fila[11])
                 datos.append(reservacion)
-        return datos
-    
-
+            return datos
 
 class NodoCola:
     def __init__(self, objeto):
@@ -245,6 +243,7 @@ class ColaReservaciones:
         else:
             self.final.siguiente = nuevo_nodo
             self.final = nuevo_nodo
+        print(objeto)    
 
     def modificar_nodo(self, objeto_buscado, nuevo_objeto):
         nodo_actual = self.frente
@@ -426,33 +425,46 @@ def main():
                     break
 
         elif opcion == 2:
-            print("")
-            print("Opcion seleccionada: Gestion de Reservaciones")
+
+            archivo_reservaciones = input("Introduzca el nombre del hotel para la configuracion de reservaciones: ")
+            archivo_reservas = f'reservaciones_{archivo_reservaciones}.csv'
+            lista_reservas = Reservaciones(archivo_reservas) #Se carga el archivo CSV de las reservaciones en una instancia de la clase Reservaciones()
+            lista = lista_reservas.cargar_datos()              
+            cola = ColaReservaciones() #se instancia objeto
+
+            for objeto in lista:
+                cola.encolar(objeto) #Se encolan los objetos de la clase Reservaciones
+
+            print("\nOpcion seleccionada: Gestion de Reservaciones\n")
             print("\nSeleccione una opcion:")
             print("1. Crear reservacion")
             print("2. Modificar reservacion")
             print("3. Listar reservaciones")
             print("4. Eliminar reservacion")
-            accion = int(input())
+            print("5. Salir")
+            accion = int(input())      
 
-            archivo_reservaciones = input("Introduzca el nombre del hotel para la configuracion de reservaciones: ")
-            archivo = f"reservaciones_{archivo_reservaciones}.csv"
-            lista_reservas = Reservaciones(archivo) #Se carga del archivo CSV las reservaciones
-            lista = lista_reservas.cargar_datos()
-            cola = ColaReservaciones()
-
-            for objeto in lista:
-                cola.encolar(objeto)
+            if accion == 1:
+                print()
+            elif accion == 2:
+                print()
             if accion == 3:
-                print("\nOpcion seleccionada: Listar reservaciones\n")
-                cola.imprimir()
+
+                if not cola.esta_vacia():                
+                    print("\nOpcion seleccionada: Listar reservaciones\n")
+                    cola.imprimir()
+                else:
+                    print("No hay reservas")
+
             elif accion == 4:
-                print("")
+                print()
+            elif accion == 5:
+                break
 
         elif opcion == 3:
             print()
         elif opcion == 4:
-            break                
+            break            
 
         ##lista_hoteles.actualizar_csv(archivo) #sobreescritura de csv de Hoteles                                                      
 main()
