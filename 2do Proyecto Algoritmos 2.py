@@ -183,71 +183,96 @@ class ListaHabitaciones:
 
 
 
+class Reservacion:
+    def __init__(self,nombre,fecha_reserva,fecha_entrada,fecha_salida,nro_habitacion,duracion_estadia,tipo_habitacion,nro_personas,telefono,contacto,precio_total,id):
+        self.nombre = nombre
+        self.fecha_reserva = fecha_reserva
+        self.fecha_entrada = fecha_entrada
+        self.fecha_salida = fecha_salida
+        self.nro_habitacion = nro_habitacion
+        self.duracion_estadia = duracion_estadia
+        self.tipo_habitacion = tipo_habitacion
+        self.nro_personas = nro_personas
+        self.telefono = telefono
+        self.contacto = contacto
+        self.precio_total = precio_total
+        self.id = id
+    
+    def __str__(self):
+        return f"{self.nombre} {self.fecha_reserva} {self.fecha_entrada} {self.fecha_salida} {self.nro_habitacion} {self.duracion_estadia} {self.tipo_habitacion} {self.nro_personas} {self.telefono} {self.contacto} {self.precio_total} {self.id}"
+    
+
+
 class Reservaciones:
     def __init__(self, archivo_csv):
         self.archivo_csv = archivo_csv
     
     def cargar_datos(self):
         datos = []
-        fila_ordenada = []
         with open(self.archivo_csv, 'r', newline='') as archivo:
             lector_csv = csv.reader(archivo,delimiter=";")
             next(lector_csv)
             for fila in lector_csv:
-                fila_ordenada.append(fila[0])
-                fila_ordenada.append(fila[1])
-                fila_ordenada.append(fila[2])
-                fila_ordenada.append(fila[3])
-                fila_ordenada.append(fila[4])
-                fila_ordenada.append(fila[5])
-                fila_ordenada.append(fila[6])
-                fila_ordenada.append(fila[7])
-                fila_ordenada.append(fila[8])
-                fila_ordenada.append(fila[9])
-                fila_ordenada.append(fila[10])
-                fila_ordenada.append(fila[11])
-                datos.append(fila)
+                reservacion = None
+                reservacion = Reservacion(fila[0],fila[1],fila[2],fila[3],fila[4],fila[5],fila[6],fila[7],fila[8],fila[9],fila[10],fila[11])
+                datos.append(reservacion)
         return datos
     
 
 
 class NodoCola:
-    def __init__(self, vector):
-        self.vector = vector
+    def __init__(self, objeto):
+        self.objeto = objeto
         self.siguiente = None
 
-class ColaConVectores:
+class ColaReservaciones:
     def __init__(self):
-        self.front = None  # Puntero al frente de la cola
-        self.final = None   # Puntero al final de la cola
-
-    
+        self.frente = None
+        self.final = None
 
     def esta_vacia(self):
-        return self.front is None
+        return self.frente is None
 
-    def encolar(self, vector):
-        nuevo_nodo = NodoCola(vector)
-        if self.esta_vacia():
-            self.front = self.final = nuevo_nodo
+    def encolar(self, objeto):
+        nuevo_nodo = NodoCola(objeto)
+        if self.final is None:
+            self.frente = self.final = nuevo_nodo
         else:
             self.final.siguiente = nuevo_nodo
             self.final = nuevo_nodo
 
-    def eliminar(self):
+    def modificar_nodo(self, objeto_buscado, nuevo_objeto):
+        nodo_actual = self.frente
+        while nodo_actual:
+            if nodo_actual.objeto == objeto_buscado:
+                nodo_actual.objeto = nuevo_objeto
+                return
+            nodo_actual = nodo_actual.siguiente
+
+    def desencolar(self):
         if self.esta_vacia():
             return None
-        vector = self.front.vector
-        self.front = self.front.siguiente
-        if self.front is None:
+        objeto = self.frente.objeto
+        self.frente = self.frente.siguiente
+        if self.frente is None:
             self.final = None
-        return vector
+        return objeto
+
+    def longitud(self):
+        contador = 0
+        nodo_actual = self.frente
+        while nodo_actual:
+            contador += 1
+            nodo_actual = nodo_actual.siguiente
+        return contador
 
     def imprimir(self):
-        nodo_actual = self.front
+        nodo_actual = self.frente
         while nodo_actual:
-            print(nodo_actual.vector)
+            print(nodo_actual.objeto)
             nodo_actual = nodo_actual.siguiente
+
+
 
 
 def main():
@@ -405,15 +430,21 @@ def main():
             print("Listar reservaciones")
             print("Eliminar reservacion")
             accion = int(input("Aca: "))
+            archivo_reservaciones = 'reservaciones_valencia.csv'
+            lista_reservas = Reservaciones(archivo_reservaciones) #Se carga del archivo CSV las reservaciones
+            lista = lista_reservas.cargar_datos()
+            cola = ColaReservaciones()
+            for objeto in lista:
+                cola.encolar(objeto)
             if accion == 3:
                 print("")
-                archivo_reservaciones = 'reservaciones_valencia.csv'
-                lista_reservas = Reservaciones(archivo_reservaciones)
-                database = lista_reservas.cargar_datos()
-                for i in range(len(database)):
-                    for j in range(len(database[0])):
-                        print(database[i][j]," ",end="")
-                    print("")
+                print("Opcion seleccionada: Listar reservaciones")
+                print("")
+                cola.imprimir()
+                print("")
+            elif accion == 4:
+                print("")
+
         elif opcion == 3:
             print()
         elif opcion == 4:
