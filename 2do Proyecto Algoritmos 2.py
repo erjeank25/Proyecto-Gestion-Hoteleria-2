@@ -205,6 +205,11 @@ class Reservacion:
         self.precio_total = precio_total
         self.id = id
     
+    def obtener_datos(self):
+        return [self.nombre, self.fecha_reserva, self.fecha_entrada, self.fecha_salida, self.nro_habitacion,
+                self.duracion_estadia, self.tipo_habitacion, self.nro_personas, self.telefono, self.contacto,
+                self.precio_total, self.id]
+
     def __str__(self):
         return f"{self.nombre} {self.fecha_reserva} {self.fecha_entrada} {self.fecha_salida} {self.nro_habitacion} {self.duracion_estadia} {self.tipo_habitacion} {self.nro_personas} {self.telefono} {self.contacto} {self.precio_total} {self.id}"
     
@@ -212,6 +217,11 @@ class Reservaciones:
     def __init__(self, archivo_csv):
         self.archivo_csv = archivo_csv
     
+    def guardar_csv(self, archivo, nueva_reserva): #modificacion de archivo csv
+        with open(archivo, 'a', newline='') as archivo_csv:
+            escritor = csv.writer(archivo_csv, delimiter=';')
+            escritor.writerow(nueva_reserva.obtener_datos())
+
     def cargar_datos(self):
         datos = []
         with open(self.archivo_csv, 'r', newline='') as archivo:
@@ -270,11 +280,40 @@ class ColaReservaciones:
             nodo_actual = nodo_actual.siguiente
         return contador
 
-    def imprimir(self):
+    def imprimir(self): #listar reservaciones
         nodo_actual = self.frente
+
         while nodo_actual:
             print(nodo_actual.objeto)
             nodo_actual = nodo_actual.siguiente
+ 
+
+    def modificar(self, id_reserva, nueva_reservacion):
+        nodo_actual = self.frente
+        while nodo_actual:
+            if nodo_actual.objeto.id == id_reserva:
+                nodo_actual.objeto = nueva_reservacion
+                print("Reservacion modificada exitosamente")
+                return
+            nodo_actual = nodo_actual.siguiente
+        print("No se encontro la reservacion con el ID especificado")
+
+    def eliminar_reservacion(self, id_reserva):
+        nodo_actual = self.frente
+        nodo_anterior = None
+        while nodo_actual:
+            if nodo_actual.objeto.id == id_reserva:
+                if nodo_anterior:
+                    nodo_anterior.siguiente = nodo_actual.siguiente
+                    print("Reservacion eliminada exitosamente")
+                    return
+                else:
+                    self.desencolar()
+                    print("Reservacion eliminada exitosamente")
+                    return
+            nodo_anterior = nodo_actual
+            nodo_actual = nodo_actual.siguiente
+        print("No se encontro la reservacion con el ID especificado")                            
 
 
 
@@ -426,7 +465,7 @@ def main():
 
         elif opcion == 2:
 
-            archivo_reservaciones = input("Introduzca el nombre del hotel para la configuracion de reservaciones: ")
+            archivo_reservaciones = input("\nIntroduzca el nombre del hotel para la configuracion de reservaciones: ")
             archivo_reservas = f'reservaciones_{archivo_reservaciones}.csv'
             lista_reservas = Reservaciones(archivo_reservas) #Se carga el archivo CSV de las reservaciones en una instancia de la clase Reservaciones()
             lista = lista_reservas.cargar_datos()              
@@ -445,7 +484,29 @@ def main():
             accion = int(input())      
 
             if accion == 1:
-                print()
+                print("\nOpción seleccionada: Crear reservación\n")
+                print("Hotel selecionado (archivo): ",archivo_reservas)
+                nombre = input("Nombre: ")
+                fecha_reserva = input("Fecha de reserva (DD/MM/YYYY): ")
+                fecha_entrada = input("Fecha de entrada (DD/MM/YYYY): ")
+                fecha_salida = input("Fecha de salida (DD/MM/YYYY): ")
+                nro_habitacion = int(input("Número de habitación: "))
+                duracion_estadia = int(input("Duración de la estancia (en días): "))
+                tipo_habitacion = input("Tipo de habitación: ")
+                nro_personas = int(input("Número de personas: "))
+                telefono = input("Teléfono de contacto: ")
+                correo = input("Correo: ")
+                precio_total = float(input("Precio total: "))
+                id_reserva = input("ID de la reserva: ")
+
+                nueva_reservacion = Reservacion(nombre, fecha_reserva, fecha_entrada, fecha_salida, nro_habitacion,
+                                                duracion_estadia, tipo_habitacion, nro_personas, telefono, correo,
+                                                precio_total, id_reserva)
+
+                # Llamamos al método para encolar la nueva reservación
+                cola.encolar(nueva_reservacion)
+                lista_reservas.guardar_csv(archivo_reservas, nueva_reservacion)
+
             elif accion == 2:
                 print()
             if accion == 3:
