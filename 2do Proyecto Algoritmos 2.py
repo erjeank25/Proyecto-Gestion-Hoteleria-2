@@ -263,14 +263,14 @@ class ColaReservaciones:
                 return
             nodo_actual = nodo_actual.siguiente
 
-    def desencolar(self):
-        if self.esta_vacia():
-            return None
-        objeto = self.frente.objeto
-        self.frente = self.frente.siguiente
-        if self.frente is None:
-            self.final = None
-        return objeto
+    # def desencolar(self):
+    #     if self.esta_vacia():
+    #         return None
+    #     objeto = self.frente.objeto
+    #     self.frente = self.frente.siguiente
+    #     if self.frente is None:
+    #         self.final = None
+    #     return objeto
 
     def longitud(self):
         contador = 0
@@ -298,23 +298,40 @@ class ColaReservaciones:
             nodo_actual = nodo_actual.siguiente
         print("No se encontro la reservacion con el ID especificado")
 
-    def eliminar_reservacion(self, id_reserva):
+    def eliminar_reservacion_y_sobreescribir_csv(self, id_reserva, archivo_csv):
         nodo_actual = self.frente
         nodo_anterior = None
+
         while nodo_actual:
             if nodo_actual.objeto.id == id_reserva:
                 if nodo_anterior:
                     nodo_anterior.siguiente = nodo_actual.siguiente
-                    print("Reservacion eliminada exitosamente")
-                    return
                 else:
-                    self.desencolar()
-                    print("Reservacion eliminada exitosamente")
-                    return
+                    # Si el nodo a eliminar es el primero de la cola
+                    self.frente = nodo_actual.siguiente
+
+                if nodo_actual == self.final:
+                    # Si el nodo a eliminar es el último de la cola
+                    self.final = nodo_anterior
+
+                print("Reservación eliminada exitosamente")
+
+                # Sobreescribir el archivo CSV con el contenido actualizado
+                with open(archivo_csv, 'w', newline='') as archivo:
+                    escritor_csv = csv.writer(archivo, delimiter=";")
+                    escritor_csv.writerow(["Nombre", "Fecha Reservacion", "Fecha Entrada", "Fecha Salida", "Nro Habitacion", "Duracion de la Estadía (días)", "Tipo de Habitacion", "Nro Personas", "Telefono", "Contacto", "Precio Total ($)", "ID"])
+                    nodo_actual = self.frente
+                    while nodo_actual:
+                        objeto = nodo_actual.objeto
+                        escritor_csv.writerow([objeto.nombre, objeto.fecha_reserva, objeto.fecha_entrada, objeto.fecha_salida, objeto.nro_habitacion, objeto.duracion_estadia, objeto.tipo_habitacion, objeto.nro_personas, objeto.telefono, objeto.contacto, objeto.precio_total, objeto.id])
+                        nodo_actual = nodo_actual.siguiente
+
+                return
+
             nodo_anterior = nodo_actual
             nodo_actual = nodo_actual.siguiente
-        print("No se encontro la reservacion con el ID especificado")                            
 
+        print("No se encontró la reservación con el ID especificado")
 
 
 
@@ -509,8 +526,7 @@ def main():
 
             elif accion == 2:
                 print()
-            if accion == 3:
-
+            elif accion == 3:
                 if not cola.esta_vacia():                
                     print("\nOpcion seleccionada: Listar reservaciones\n")
                     cola.imprimir()
@@ -518,7 +534,12 @@ def main():
                     print("No hay reservas")
 
             elif accion == 4:
-                print()
+                print("")
+                print("\nOpcion seleccionada: Eliminar reservacion")
+                print("")
+                print("")
+                id_eliminar = int(input("Introduce el id que quieres eliminar: "))
+                cola.eliminar_reservacion_y_sobreescribir_csv(id_eliminar,archivo_reservas)
             elif accion == 5:
                 break
 
