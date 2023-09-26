@@ -188,8 +188,6 @@ class ListaHabitaciones:
                 return
             nodo_actual = nodo_actual.siguiente
 
-
-
 class Reservacion:
     def __init__(self,nombre,fecha_reserva,fecha_entrada,fecha_salida,nro_habitacion,duracion_estadia,tipo_habitacion,nro_personas,telefono,contacto,precio_total,id):
         self.nombre = nombre
@@ -217,7 +215,7 @@ class Reservaciones:
     def __init__(self, archivo_csv):
         self.archivo_csv = archivo_csv
     
-    def guardar_csv(self, archivo, nueva_reserva): #modificacion de archivo csv
+    def guardar_csv(self, archivo, nueva_reserva): #modificacion de archivo csv de reservas
         with open(archivo, 'a', newline='') as archivo_csv:
             escritor = csv.writer(archivo_csv, delimiter=';')
             escritor.writerow(nueva_reserva.obtener_datos())
@@ -232,6 +230,67 @@ class Reservaciones:
                 reservacion = Reservacion(fila[0], fila[1], fila[2], fila[3], fila[4], fila[5], fila[6], fila[7], fila[8], fila[9], fila[10],fila[11])
                 datos.append(reservacion)
             return datos
+
+    def eliminar_reservacion(self, id_reserva):
+            datos = self.cargar_datos()  # Obtén todos los datos
+
+            # Encuentra la reservación con el ID dado
+            reservacion_encontrada = None
+            for reservacion in datos:
+                if reservacion.id == id_reserva:
+                    reservacion_encontrada = reservacion
+                    break
+
+            if reservacion_encontrada:
+                datos.remove(reservacion_encontrada)  # Elimina la reservación
+
+                # Sobrescribe el archivo CSV con los datos actualizados
+                with open(self.archivo_csv, 'w', newline='') as archivo:
+                    escritor = csv.writer(archivo, delimiter=';')
+                    escritor.writerow(['Nombre', 'Fecha Reserva', 'Fecha Entrada', 'Fecha Salida', 'Nro Habitacion',
+                                    'Duracion Estadia', 'Tipo Habitacion', 'Nro Personas', 'Telefono', 'Contacto',
+                                    'Precio Total', 'ID'])
+
+                    for reserva in datos:
+                        escritor.writerow([reserva.nombre, reserva.fecha_reserva, reserva.fecha_entrada, reserva.fecha_salida,
+                                        reserva.nro_habitacion, reserva.duracion_estadia, reserva.tipo_habitacion,
+                                        reserva.nro_personas, reserva.telefono, reserva.contacto, reserva.precio_total,
+                                        reserva.id])
+                print("Reservación eliminada exitosamente.")
+            else:
+                print("No se encontró una reservación con el ID proporcionado.")
+
+    def modificar_reservacion(self, id_reserva, nombre, fecha_reserva, fecha_entrada, fecha_salida, nro_habitacion,
+                            duracion_estadia, tipo_habitacion, nro_personas, telefono, correo, precio_total):
+        datos = self.cargar_datos()
+        for reserva in datos:
+            if reserva.id == id_reserva:
+                # Modifica los datos de la reserva
+                reserva.nombre = nombre
+                reserva.fecha_reserva = fecha_reserva
+                reserva.fecha_entrada = fecha_entrada
+                reserva.fecha_salida = fecha_salida
+                reserva.nro_habitacion = nro_habitacion
+                reserva.duracion_estadia = duracion_estadia
+                reserva.tipo_habitacion = tipo_habitacion
+                reserva.nro_personas = nro_personas
+                reserva.telefono = telefono
+                reserva.contacto = correo
+                reserva.precio_total = precio_total
+
+        # Guarda los datos modificados en el archivo CSV
+        with open(self.archivo_csv, 'w', newline='') as archivo:
+            escritor = csv.writer(archivo, delimiter=';')
+            # Escribe los encabezados
+            escritor.writerow(['Nombre', 'Fecha Reserva', 'Fecha Entrada', 'Fecha Salida', 'Nro Habitacion',
+                            'Duracion Estadia', 'Tipo Habitacion', 'Nro Personas', 'Telefono', 'Contacto',
+                            'Precio Total', 'ID'])
+            # Escribe las reservas modificadas
+            for reserva in datos:
+                escritor.writerow([reserva.nombre, reserva.fecha_reserva, reserva.fecha_entrada, reserva.fecha_salida,
+                                reserva.nro_habitacion, reserva.duracion_estadia, reserva.tipo_habitacion,
+                                reserva.nro_personas, reserva.telefono, reserva.contacto, reserva.precio_total,
+                                reserva.id])         
 
 class NodoCola:
     def __init__(self, objeto):
@@ -315,9 +374,6 @@ class ColaReservaciones:
             nodo_actual = nodo_actual.siguiente
         print("No se encontro la reservacion con el ID especificado")                            
 
-
-
-
 def main():
 
     archivo = 'hoteles.csv'
@@ -325,7 +381,6 @@ def main():
     lista_hoteles = ListaHoteles() #instanciacion de un objeto de ListaHoteles()
     lista_hoteles.cargar_csv(archivo) #lectura del archivo.csv
     
-
     opcion = 0
     opcion_2 = 0
 
@@ -486,7 +541,7 @@ def main():
             if accion == 1:
                 print("\nOpción seleccionada: Crear reservación\n")
                 print("Hotel selecionado (archivo): ",archivo_reservas)
-                nombre = input("Nombre: ")
+                nombre = input("Nombre del cliente: ")
                 fecha_reserva = input("Fecha de reserva (DD/MM/YYYY): ")
                 fecha_entrada = input("Fecha de entrada (DD/MM/YYYY): ")
                 fecha_salida = input("Fecha de salida (DD/MM/YYYY): ")
@@ -494,8 +549,8 @@ def main():
                 duracion_estadia = int(input("Duración de la estancia (en días): "))
                 tipo_habitacion = input("Tipo de habitación: ")
                 nro_personas = int(input("Número de personas: "))
-                telefono = input("Teléfono de contacto: ")
-                correo = input("Correo: ")
+                telefono = input("Teléfono del cliente: ")
+                correo = input("Correo del cliente: ")
                 precio_total = float(input("Precio total: "))
                 id_reserva = input("ID de la reserva: ")
 
@@ -503,13 +558,29 @@ def main():
                                                 duracion_estadia, tipo_habitacion, nro_personas, telefono, correo,
                                                 precio_total, id_reserva)
 
-                # Llamamos al método para encolar la nueva reservación
-                cola.encolar(nueva_reservacion)
-                lista_reservas.guardar_csv(archivo_reservas, nueva_reservacion)
+                cola.encolar(nueva_reservacion) #Llamamos al método para encolar la nueva reservación
+                lista_reservas.guardar_csv(archivo_reservas, nueva_reservacion) #Se cambia el csv
 
             elif accion == 2:
-                print()
-            if accion == 3:
+                id_reserva_modificar = input("Introduce el ID de la reserva a modificar: ")
+
+                nuevo_nombre = input("Nombre del cliente: ")
+                nueva_fecha_reserva = input("Fecha de reserva (DD/MM/YYYY): ")
+                nueva_fecha_entrada = input("Fecha de entrada (DD/MM/YYYY): ")
+                nueva_fecha_salida = input("Fecha de salida (DD/MM/YYYY): ")
+                nuevo_nro_habitacion = int(input("Número de habitación: "))
+                nuevo_duracion_estadia = int(input("Duración de la estancia (en días): "))
+                nuevo_tipo_habitacion = input("Tipo de habitación: ")
+                nuevo_nro_personas = int(input("Número de personas: "))
+                nuevo_telefono = input("Teléfono del cliente: ")
+                nuevo_correo = input("Correo del cliente: ")
+                nuevo_precio_total = float(input("Precio total: "))
+
+                lista_reservas.modificar_reservacion(id_reserva_modificar, nuevo_nombre, nueva_fecha_reserva, nueva_fecha_entrada, 
+                                                     nueva_fecha_salida, nuevo_nro_habitacion, nuevo_duracion_estadia, 
+                                                     nuevo_tipo_habitacion, nuevo_nro_personas, nuevo_telefono, nuevo_correo, nuevo_precio_total)
+
+            elif accion == 3:
 
                 if not cola.esta_vacia():                
                     print("\nOpcion seleccionada: Listar reservaciones\n")
@@ -518,7 +589,11 @@ def main():
                     print("No hay reservas")
 
             elif accion == 4:
-                print()
+
+                print("\nOpcion seleccionada: Eliminar reservaciones\n")
+                id_a_eliminar = input("Introduzca el ID de la reserva a eliminar: ")
+                lista_reservas.eliminar_reservacion(id_a_eliminar)
+
             elif accion == 5:
                 break
 
