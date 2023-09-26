@@ -581,8 +581,24 @@ def main():
                 lista_reservas.guardar_csv(archivo_reservas, nueva_reservacion) #Se cambia el csv
 
             elif accion == 2:
-                print()
-            if accion == 3:
+                id_reserva_modificar = input("Introduce el ID de la reserva a modificar: ")
+
+                nuevo_nombre = input("Nombre del cliente: ")
+                nueva_fecha_reserva = input("Fecha de reserva (DD/MM/YYYY): ")
+                nueva_fecha_entrada = input("Fecha de entrada (DD/MM/YYYY): ")
+                nueva_fecha_salida = input("Fecha de salida (DD/MM/YYYY): ")
+                nuevo_nro_habitacion = int(input("Número de habitación: "))
+                nuevo_duracion_estadia = int(input("Duración de la estancia (en días): "))
+                nuevo_tipo_habitacion = input("Tipo de habitación: ")
+                nuevo_nro_personas = int(input("Número de personas: "))
+                nuevo_telefono = input("Teléfono del cliente: ")
+                nuevo_correo = input("Correo del cliente: ")
+                nuevo_precio_total = float(input("Precio total: "))
+
+                lista_reservas.modificar_reservacion(id_reserva_modificar, nuevo_nombre, nueva_fecha_reserva, nueva_fecha_entrada, 
+                                                     nueva_fecha_salida, nuevo_nro_habitacion, nuevo_duracion_estadia, 
+                                                     nuevo_tipo_habitacion, nuevo_nro_personas, nuevo_telefono, nuevo_correo, nuevo_precio_total)
+            elif accion == 3:
 
                 if not cola.esta_vacia():                
                     print("\nOpcion seleccionada: Listar reservaciones\n")
@@ -591,7 +607,11 @@ def main():
                     print("No hay reservas")
 
             elif accion == 4:
-                print()
+
+                print("\nOpcion seleccionada: Eliminar reservaciones\n")
+                id_a_eliminar = input("Introduzca el ID de la reserva a eliminar: ")
+                lista_reservas.eliminar_reservacion(id_a_eliminar)
+
             elif accion == 5:
                 break
 
