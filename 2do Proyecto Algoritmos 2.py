@@ -32,31 +32,25 @@ pila_registros = PilaRegistro() #Se usara a lo largo del programa, por eso se po
 pila_nueva = PilaRegistro()
 
 def logRegistrosyErrores(pila,pila_2,archivo_csv):
-    try:
-        with open(archivo_csv, 'w', newline='') as archivo: #Agregar los registros actuales al csv
-            # Crea un objeto escritor CSV
-            escritor = csv.writer(archivo,delimiter=';')
-            escritor.writerow(['Tipo Accion','Detalles Adicionales','Fecha','Hora'])
-            while not pila.esta_vacia():
-                elemento = pila.desapilar()
-                pila_2.apilar(elemento)
-                escritor.writerow(elemento)
-        while not pila_2.esta_vacia():
-            elemento = pila_2.desapilar()
-            pila.apilar(elemento)
-        with open(archivo_csv, 'r', newline='') as archivo: #Listar lo anteriormente agregado
-            lector = csv.reader(archivo,delimiter=';')
-            next(lector)
-            print("")
-            print("Tipo                        Descripcion                                               Fecha                   Hora")
-            for fila in lector:
-                print("{:<10} {:<70} {:<25} {:^12}".format(fila[0],fila[1],fila[2],fila[3]))
-    except FileNotFoundError as e:
-        print("Error: ",e)
-        descripcion_registro = e
-        elemento_registrado = registrar('Error',descripcion_registro)
-        pila_registros.apilar(elemento_registrado)  
-
+    with open(archivo_csv, 'w', newline='') as archivo: #Agregar los registros actuales al csv
+        # Crea un objeto escritor CSV
+        escritor = csv.writer(archivo,delimiter=';')
+        escritor.writerow(['Tipo Accion','Detalles Adicionales','Fecha','Hora'])
+        while not pila.esta_vacia():
+            elemento = pila.desapilar()
+            pila_2.apilar(elemento)
+            escritor.writerow(elemento)
+    while not pila_2.esta_vacia():
+        elemento = pila_2.desapilar()
+        pila.apilar(elemento)
+    with open(archivo_csv, 'r', newline='') as archivo: #Listar lo anteriormente agregado
+        lector = csv.reader(archivo,delimiter=';')
+        next(lector)
+        print("")
+        print("Tipo                        Descripcion                                               Fecha                   Hora")
+        for fila in lector:
+            print("{:<10} {:<70} {:<25} {:^12}".format(fila[0],fila[1],fila[2],fila[3]))
+    
 class Hotel: #constructor hotel
     def __init__(self, nombre, direccion, telefono, habitaciones_disponibles, nro_reservas):
         self.nombre = nombre
@@ -112,36 +106,42 @@ class ListaHoteles:
             nodo_actual.siguiente = nuevo_nodo
 
     def crear(self, nombre, direccion, telefono, habitaciones_disponibles, nro_reservas):
+        try:
+            nuevo_hotel = Hotel(nombre, direccion, telefono, habitaciones_disponibles, nro_reservas)
+            
+            with open(f'habitaciones_{nombre.lower()}.csv','w',newline='') as nuevo_csv: #creacion del nuevo archivo de habitaciones
+                escritor = csv.writer(nuevo_csv,delimiter=';')
+                escritor.writerow(['Numero Habitaciones', 'Disponibilidad']) #encabezados de habitaciones
 
-        nuevo_hotel = Hotel(nombre, direccion, telefono, habitaciones_disponibles, nro_reservas)
-        
-        with open(f'habitaciones_{nombre.lower()}.csv','w',newline='') as nuevo_csv: #creacion del nuevo archivo de habitaciones
-            escritor = csv.writer(nuevo_csv,delimiter=';')
-            escritor.writerow(['Numero Habitaciones', 'Disponibilidad']) #encabezados de habitaciones
+                for i in range(1,habitaciones_disponibles + 1):
+                    escritor.writerow([i, 'Disponible'])
 
-            for i in range(1,habitaciones_disponibles + 1):
-                escritor.writerow([i, 'Disponible'])
+                for i in range(habitaciones_disponibles + 1, habitaciones_disponibles + nro_reservas + 1):
+                    escritor.writerow([i, 'No Disponible'])
 
-            for i in range(habitaciones_disponibles + 1, habitaciones_disponibles + nro_reservas + 1):
-                escritor.writerow([i, 'No Disponible'])
+            with open(f'reservaciones_{nombre.lower()}.csv','w',newline='') as nuevo_csv: #creacion del nuevo archivo de reservas
+                escritor = csv.writer(nuevo_csv, delimiter=';')
+                escritor.writerow(['Nombre', 'Fecha Reserva', 'Fecha Entrada', 'Fecha Salida', 'Nro Habitacion', #encabezados de reservas
+                                    'Duracion Estadia', 'Tipo Habitacion', 'Nro Personas', 'Telefono', 'Contacto', 
+                                    'Precio Total', 'ID'])
 
-        with open(f'reservaciones_{nombre.lower()}.csv','w',newline='') as nuevo_csv: #creacion del nuevo archivo de reservas
-            escritor = csv.writer(nuevo_csv, delimiter=';')
-            escritor.writerow(['Nombre', 'Fecha Reserva', 'Fecha Entrada', 'Fecha Salida', 'Nro Habitacion', #encabezados de reservas
-                               'Duracion Estadia', 'Tipo Habitacion', 'Nro Personas', 'Telefono', 'Contacto', 
-                               'Precio Total', 'ID'])
+            nuevo_hotel.habitaciones_disponibles = habitaciones_disponibles        
+            
+            nuevo_nodo = NodoHotel(nuevo_hotel)        
 
-        nuevo_hotel.habitaciones_disponibles = habitaciones_disponibles        
-        
-        nuevo_nodo = NodoHotel(nuevo_hotel)        
+            if not self.inicio:
+                self.inicio = nuevo_nodo
+            else:
+                nodo_actual = self.inicio
+                while nodo_actual.siguiente:
+                    nodo_actual = nodo_actual.siguiente
+                nodo_actual.siguiente = nuevo_nodo
+        except FileNotFoundError as e:
+            print("Error: ",e)
+            descripcion_registro = e
+            elemento_registrado = registrar('Error',descripcion_registro)
+            pila_registros.apilar(elemento_registrado)
 
-        if not self.inicio:
-            self.inicio = nuevo_nodo
-        else:
-            nodo_actual = self.inicio
-            while nodo_actual.siguiente:
-                nodo_actual = nodo_actual.siguiente
-            nodo_actual.siguiente = nuevo_nodo
 
     #modificar hotel
     def modificar(self, nombre, nueva_direccion, nuevo_telefono,nuevas_habitaciones_disponibles,nuevos_nros_reserva):
@@ -160,33 +160,39 @@ class ListaHoteles:
     def actualizar_modificacion(self, nombre, nueva_direccion, nuevo_telefono, nuevas_habitaciones_disponibles, nuevos_nros_reserva):
 
         # actualizar csv de hoteles
-        datos = []
-        with open('hoteles.csv', 'r', newline='', encoding='utf-8') as archivo_csv:
-            lector = csv.reader(archivo_csv, delimiter=';')
-            # Buscar y modificar la información del hotel
-            for fila in lector:
-                if fila[0] == nombre:
-                    fila[1] = nueva_direccion
-                    fila[2] = nuevo_telefono
-                    fila[3] = str(nuevas_habitaciones_disponibles)  # Convertir a str para escribir en CSV
-                    fila[4] = str(nuevos_nros_reserva)  # Convertir a str para escribir en CSV
+        try:
+            datos = []
+            with open('hoteles.csv', 'r', newline='', encoding='utf-8') as archivo_csv:
+                lector = csv.reader(archivo_csv, delimiter=';')
+                # Buscar y modificar la información del hotel
+                for fila in lector:
+                    if fila[0] == nombre:
+                        fila[1] = nueva_direccion
+                        fila[2] = nuevo_telefono
+                        fila[3] = str(nuevas_habitaciones_disponibles)  # Convertir a str para escribir en CSV
+                        fila[4] = str(nuevos_nros_reserva)  # Convertir a str para escribir en CSV
 
-                datos.append(fila)
-        
-        # actualizar csv de reservas
-        with open('hoteles.csv', 'w', newline='') as archivo_csv:
-            escritor = csv.writer(archivo_csv, delimiter=';')
-            escritor.writerows(datos)
+                    datos.append(fila)
+            
+            # actualizar csv de reservas
+            with open('hoteles.csv', 'w', newline='') as archivo_csv:
+                escritor = csv.writer(archivo_csv, delimiter=';')
+                escritor.writerows(datos)
 
-        with open(f'habitaciones_{nombre.lower()}.csv','w',newline='') as nuevo_csv: #creacion del nuevo archivo de habitaciones
-            escritor = csv.writer(nuevo_csv,delimiter=';')
-            escritor.writerow(['Numero Habitaciones', 'Disponibilidad']) #encabezados de habitaciones
+            with open(f'habitaciones_{nombre.lower()}.csv','w',newline='') as nuevo_csv: #creacion del nuevo archivo de habitaciones
+                escritor = csv.writer(nuevo_csv,delimiter=';')
+                escritor.writerow(['Numero Habitaciones', 'Disponibilidad']) #encabezados de habitaciones
 
-            for i in range(1,nuevas_habitaciones_disponibles + 1):
-                escritor.writerow([i, 'Disponible'])
+                for i in range(1,nuevas_habitaciones_disponibles + 1):
+                    escritor.writerow([i, 'Disponible'])
 
-            for i in range(nuevas_habitaciones_disponibles + 1, nuevas_habitaciones_disponibles + nuevos_nros_reserva + 1):
-                escritor.writerow([i, 'No Disponible'])
+                for i in range(nuevas_habitaciones_disponibles + 1, nuevas_habitaciones_disponibles + nuevos_nros_reserva + 1):
+                    escritor.writerow([i, 'No Disponible'])
+        except FileNotFoundError as e:
+            print("Error: ",e)
+            descripcion_registro = e
+            elemento_registrado = registrar('Error',descripcion_registro)
+            pila_registros.apilar(elemento_registrado)
 
 
     #listar hoteles
@@ -226,14 +232,20 @@ class ListaHoteles:
 
     #actualizar csv de los hoteles
     def actualizar_csv(self,archivo):
-        with open(archivo, 'w',newline='') as archivo_csv:
-            sobreescritura = csv.writer(archivo_csv, delimiter=';')
-            sobreescritura.writerow(['Nombre', 'Direccion', 'Telefono', 'Habitaciones Disponibles', 'Numero de Reservas'])
-            nodo_actual = self.inicio
-            while nodo_actual:
-                hotel = nodo_actual.hotel
-                sobreescritura.writerow([hotel.nombre, hotel.direccion, hotel.telefono, hotel.habitaciones_disponibles, hotel.nro_reservas])
-                nodo_actual = nodo_actual.siguiente
+        try:
+            with open(archivo, 'w',newline='') as archivo_csv:
+                sobreescritura = csv.writer(archivo_csv, delimiter=';')
+                sobreescritura.writerow(['Nombre', 'Direccion', 'Telefono', 'Habitaciones Disponibles', 'Numero de Reservas'])
+                nodo_actual = self.inicio
+                while nodo_actual:
+                    hotel = nodo_actual.hotel
+                    sobreescritura.writerow([hotel.nombre, hotel.direccion, hotel.telefono, hotel.habitaciones_disponibles, hotel.nro_reservas])
+                    nodo_actual = nodo_actual.siguiente
+        except FileNotFoundError as e:
+            print("Error: ",e)
+            descripcion_registro = e
+            elemento_registrado = registrar('Error',descripcion_registro)
+            pila_registros.apilar(elemento_registrado)
 
 class ListaHabitaciones:
     def __init__(self):
@@ -250,17 +262,14 @@ class ListaHabitaciones:
             nodo_actual.siguiente = nueva_habitacion
 
     def cargar_desde_csv(self, archivo):
-        try:
-            with open(f'habitaciones_{archivo}.csv', 'r') as archivo_csv:
-                lector = csv.reader(archivo_csv, delimiter=';')
-                next(lector)
+        with open(f'habitaciones_{archivo}.csv', 'r') as archivo_csv:
+            lector = csv.reader(archivo_csv, delimiter=';')
+            next(lector)
 
-                for fila in lector:
-                    numero_habitacion, disponibilidad = fila
-                    numero_habitacion = int(numero_habitacion)
-                    self.agregar_habitacion(numero_habitacion, disponibilidad)
-        except FileNotFoundError:
-            print("No se encontro el archivo de habitaciones")
+            for fila in lector:
+                numero_habitacion, disponibilidad = fila
+                numero_habitacion = int(numero_habitacion)
+                self.agregar_habitacion(numero_habitacion, disponibilidad)
 
     def guardar_a_csv(self, archivo):
         with open(archivo, 'w', newline='') as archivo_csv:
