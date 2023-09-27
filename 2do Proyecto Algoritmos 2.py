@@ -1,6 +1,63 @@
 import csv #manipulacion de archivos csv
 import os #eliminacion de archivos csv
 import datetime #se utilizara para la fecha y hora exacta de un registro
+import re
+
+
+
+class PilaRegistro:
+    def __init__(self):
+        self.items = []
+
+    def esta_vacia(self):
+        return len(self.items) == 0
+
+    def apilar(self, elemento):
+        self.items.append(elemento)
+
+    def desapilar(self):
+        if not self.esta_vacia():
+            return self.items.pop()
+        else:
+            raise IndexError("La pila está vacía")
+
+    def cima(self):
+        if not self.esta_vacia():
+            return self.items[-1]
+        else:
+            raise IndexError("La pila está vacía")
+
+    def tamano(self):
+        return len(self.items)
+
+pila_registros = PilaRegistro() #Se usara a lo largo del programa, por eso se pone acá
+pila_nueva = PilaRegistro()
+
+def logRegistrosyErrores(pila,pila_2,archivo_csv):
+    try:
+        with open(archivo_csv, 'w', newline='') as archivo: #Agregar los registros actuales al csv
+            # Crea un objeto escritor CSV
+            escritor = csv.writer(archivo,delimiter=';')
+            escritor.writerow(['Tipo Accion','Detalles Adicionales','Fecha','Hora'])
+            while not pila.esta_vacia():
+                elemento = pila.desapilar()
+                pila_2.apilar(elemento)
+                escritor.writerow(elemento)
+        while not pila_2.esta_vacia():
+            elemento = pila_2.desapilar()
+            pila.apilar(elemento)
+        with open(archivo_csv, 'r', newline='') as archivo: #Listar lo anteriormente agregado
+            lector = csv.reader(archivo,delimiter=';')
+            next(lector)
+            print("")
+            print("Tipo                        Descripcion                                               Fecha                   Hora")
+            for fila in lector:
+                print("{:<10} {:<70} {:<25} {:^12}".format(fila[0],fila[1],fila[2],fila[3]))
+    except FileNotFoundError as e:
+        print("Error: ",e)
+        descripcion_registro = e
+        elemento_registrado = registrar('Error',descripcion_registro)
+        pila_registros.apilar(elemento_registrado)  
 
 class Hotel: #constructor hotel
     def __init__(self, nombre, direccion, telefono, habitaciones_disponibles, nro_reservas):
@@ -259,7 +316,7 @@ class Reservaciones:
                                         reserva.id])
                 print("Reservación eliminada exitosamente.")
             else:
-                print("No se encontró una reservación con el ID proporcionado.")
+                raise ValueError("No se encontró una reservación con el ID proporcionado.")
 
     def modificar_reservacion(self, id_reserva, nombre, fecha_reserva, fecha_entrada, fecha_salida, nro_habitacion,
                             duracion_estadia, tipo_habitacion, nro_personas, telefono, correo, precio_total):
@@ -278,6 +335,8 @@ class Reservaciones:
                 reserva.telefono = telefono
                 reserva.contacto = correo
                 reserva.precio_total = precio_total
+            else:
+                raise ValueError("El id introducido para modificar no existe en el sistema")
 
         # Guarda los datos modificados en el archivo CSV
         with open(self.archivo_csv, 'w', newline='') as archivo:
@@ -313,7 +372,10 @@ class ColaReservaciones:
         else:
             self.final.siguiente = nuevo_nodo
             self.final = nuevo_nodo
-        print(objeto)    
+        print("{:<12} {:<15} {:<15} {:<15} {:<12} {:<8} {:<14} {:<8} {:<14} {:<32} {:<8} {:<6}".format(objeto.nombre,objeto.fecha_reserva,objeto.fecha_entrada,objeto.fecha_salida,objeto.nro_habitacion,objeto.duracion_estadia,objeto.tipo_habitacion,objeto.nro_personas,objeto.telefono,objeto.contacto,objeto.precio_total,objeto.id))    
+
+# print("{:<11} {:^11} {:^24} {:34} {:<7}".format
+
 
     def modificar_nodo(self, objeto_buscado, nuevo_objeto):
         nodo_actual = self.frente
@@ -344,7 +406,7 @@ class ColaReservaciones:
         nodo_actual = self.frente
 
         while nodo_actual:
-            print(nodo_actual.objeto)
+            print("{:<12} {:<15} {:<15} {:<15} {:<12} {:<8} {:<14} {:<8} {:<14} {:<32} {:<8} {:<6}".format(nodo_actual.objeto.nombre,nodo_actual.objeto.fecha_reserva,nodo_actual.objeto.fecha_entrada,nodo_actual.objeto.fecha_salida,nodo_actual.objeto.nro_habitacion,nodo_actual.objeto.duracion_estadia,nodo_actual.objeto.tipo_habitacion,nodo_actual.objeto.nro_personas,nodo_actual.objeto.telefono,nodo_actual.objeto.contacto,nodo_actual.objeto.precio_total,nodo_actual.objeto.id))
             nodo_actual = nodo_actual.siguiente
  
 
@@ -356,7 +418,7 @@ class ColaReservaciones:
                 print("Reservacion modificada exitosamente")
                 return
             nodo_actual = nodo_actual.siguiente
-        print("No se encontro la reservacion con el ID especificado")
+        raise ValueError("No se encontro la reservacion con el ID especificado")
 
     def eliminar_reservacion_y_sobreescribir_csv(self, id_reserva, archivo_csv):
         nodo_actual = self.frente
@@ -393,246 +455,611 @@ class ColaReservaciones:
 
 
 
+def registrar(tipo,descripcion):
+    fecha = datetime.datetime.today().strftime("%d de %B de %Y")
+    hora = datetime.datetime.now().strftime("%H:%M:%S")
+    cadena = tipo,descripcion,fecha,hora
+    return cadena
+
+
+def validar_nombre(nombre):
+    if not nombre.isalpha():
+        raise ValueError("Se introdujo un nombre con caracteres especiales y/o numeros")
+    else:
+        print("")
+        print("Nombre validado")
+        print("")
+
+
+def validar_fecha(fecha):
+    patron = r'^\d{2}/\d{2}/\d{4}$'
+    if re.match(patron, fecha):
+        datetime.datetime.strptime(fecha, '%d/%m/%Y')
+        return True
+    return False
+
+
+def validar_direccion(direccion):
+    if not direccion:
+        raise ValueError("No se introdujo ninguna direccion")
+    else:
+        print("")
+        print("Direccion Validada")
+
+
+
+def validar_numero_telefonico(numero):
+    # Patrón de expresión regular para el formato 0XXX-XXXXXX
+    patron = r'^0\d{3}-\d{7}$'
+    # Verifica si el número coincide con el patrón
+    if re.match(patron, numero):
+        return True
+    else:
+        return False
+
+
+def validar_habitaciones_disponibles(habitaciones_disponibles):
+    if habitaciones_disponibles < 0:
+        raise ValueError("Se introdujo un numero de habitaciones negativo")
+    else:
+        print("")
+        print("Numero de habitaciones disponibles validada")
+        print("")
+
+def validar_reservaciones(numero_reservaciones):
+    if numero_reservaciones < 0:
+        raise ValueError("Se introdujo un numero de reservaciones negativo")
+    else:
+        print("")
+        print("Numero de reservaciones validada")
+        print("")
+
+
+def validar_numero_de_habitacion(numero_habitacion):
+    if numero_habitacion < 0:
+        raise ValueError("Los existen numeros de habitacion negativos")
+    else:
+        print("")
+        print("Numero de habitacion validada")
+        print("")
+
+
+def validar_disponibilidad(disponibilidad):
+    if disponibilidad == 'disponible':
+        print("Estado: Disponible")
+        print("Disponibilidad validada")
+        
+    elif disponibilidad == 'no disponible':
+        print("Estado: No Disponible")
+        print("Disponibilidad validada")
+        
+    else:
+        raise ValueError("No se introdujo la disponibilidad tal y como fue indicado")
+
+
+def validar_estadia(estadia):
+    if estadia < 0:
+        raise ValueError("Se introdujo un numero invalido para la estadia")
+    else:
+        print("")
+        print("Duracion de la estadia validada")
+        print("")
+
+def validar_tipo_habitacion(tipo):
+    if not tipo.isalpha():
+        raise ValueError("Se introdujeron caracteres especiales y/o numeros")
+    else:
+        print("")
+        print("Tipo de habitacion validado")
+        print("")
+
+
+def validar_nro_personas(num_personas):
+    if num_personas < 0:
+        raise ValueError("El numero que se introdujo de personas es negativo")
+    else:
+        print("")
+        print("Numero de personas validado")
+        print("")
+
+
+
+def validar_correo(correo):
+    # Patrón para validar una dirección de correo electrónico
+    patron = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+    if re.match(patron, correo):
+        return True
+    else:
+        return False
+
+def validar_precio(precio):
+    if precio < 0:
+        raise ValueError("El precio que se introdujo fue negativo")
+    else:
+        print("")
+        print("Precio validado")
+        print("")
+
+def validar_id(id):
+    if id < 0:
+        raise ValueError("El id que se introdujo fue negativo")
+    else:
+        print("")
+        print("Id validado")
+        print("")
+
+
+def validar_str_id(id_modificar):
+    valor = float(id_modificar)
+    if  valor >= 0:
+        print("")
+        print("ID a modificar validado")
+        print("")
+    else:
+        raise ValueError("Se introdujo un numero invalido en el id de la reserva a modificar")
+
+
 def gestionHoteles(lista_hoteles):
     opcion_2 = 0
     while True:
-        print("\nSeleccione una opcion:")
-        print("1. Crear otro hotel")
-        print("2. Modificar hotel")
-        print("3. Listar hoteles")
-        print("4. Eliminar Hotel")
-        print("5. Configuracion de Habitaciones de Hoteles")
-        print("6. Regresar")
-        opcion_2 = int(input())
-        
-        if opcion_2 == 1: #creacion de hotel
-            print("Selecciono: Crear otro hotel")
-            nombre = input("Introduzca el nombre del hotel: ")
-            direccion = input("Introduzca la direccion del hotel: ")
-            telefono = input("Introduzca el numero telefonico: ")
-            habitaciones_disponibles = int(input("Introduzca el numero de habitaciones: "))
-            nro_reservas = int(input("Introduzca el numero de reservas: "))
-            lista_hoteles.agregar(nombre, direccion, telefono, habitaciones_disponibles, nro_reservas)
-        
-        elif opcion_2 == 2: #modificacion de hotel
-            print("\nSelecciono: Modificar hotel")
-            nodo_actual = lista_hoteles.inicio
-            while nodo_actual:
-                nodo_actual = nodo_actual.siguiente
-
-            nombre_hotel_modificar = input("\nIntroduzca el nombre del hotel a modificar: ")
+        try:
+            descripcion_registro = ''
+            print("\nSeleccione una opcion:")
+            print("1. Crear otro hotel")
+            print("2. Modificar hotel")
+            print("3. Listar hoteles")
+            print("4. Eliminar Hotel")
+            print("5. Configuracion de Habitaciones de Hoteles")
+            print("6. Regresar")
+            opcion_2 = int(input())
             
-            #Verificar si el hotel existe
-            existe = False
-            nodo_actual = lista_hoteles.inicio
-            while nodo_actual:
-                if nodo_actual.hotel.nombre == nombre_hotel_modificar:
-                    existe = True
-                    break
-                nodo_actual = nodo_actual.siguiente
-
-            if existe:
-                nueva_direccion = input("Introduce una nueva direccion: ")
-                nuevo_telefono = input("Introduce un nuevo numero telefonico: ")
-                nuevo_habitaciones_disponibles = int(input("Introduce un nuevo numero de habitaciones disponibles: "))
-                nuevo_nro_reservas = int(input("Introduce un nuevo numero de reservas disponibles: "))
-
-                lista_hoteles.modificar(nombre_hotel_modificar, nueva_direccion, nuevo_telefono,nuevo_habitaciones_disponibles, nuevo_nro_reservas)
-            else:
-                print("\nNo existe")
-
-        elif opcion_2 == 3: #listar hoteles
-            print("\nSelecciono: Listar hoteles\n")
-            lista_hoteles.listar()
+            if opcion_2 == 1: #creacion de hotel
+                print("Selecciono: Crear otro hotel")
+                nombre = input("Introduzca el nombre del hotel: ")
+                if not nombre:
+                    raise ValueError("No se introdujo ningun nombre")
+                else:
+                    validar_nombre(nombre)
+                direccion = input("Introduzca la direccion del hotel: ")
+                validar_direccion(direccion)
+                telefono = input("Introduzca el numero telefonico (0XXX-XXXXXXX): ")
+                if not telefono:
+                    raise ValueError("No se introdujo ningun numero telefonico")
+                else:
+                    if validar_numero_telefonico(telefono):
+                        print("Numero telefonico Validado")
+                    else:
+                        raise ValueError("Se introdujo un numero de telefono con el formato incorrecto")
+                habitaciones_disponibles = int(input("Introduzca el numero de habitaciones: "))
+                validar_habitaciones_disponibles(habitaciones_disponibles)
+                nro_reservas = int(input("Introduzca el numero de reservas: "))
+                validar_reservaciones(nro_reservas)
+                lista_hoteles.agregar(nombre, direccion, telefono, habitaciones_disponibles, nro_reservas)
+                
+                descripcion_registro = 'Se creó de manera exitosa el hotel ',nombre
+                elemento_registrado = registrar('Accion',descripcion_registro)
+                pila_registros.apilar(elemento_registrado)
             
-        elif opcion_2 == 4: #eliminar hotel
-            print("\nSelecciono: Eliminar hoteles\n")
-            nombre_hotel_eliminar = input("\nIntroduzca el nombre del hotel a eliminar: ")
-            
-            #Verificar si el hotel existe
-            existe = False
-            nodo_actual = lista_hoteles.inicio
-            while nodo_actual:
-                if nodo_actual.hotel.nombre == nombre_hotel_eliminar:
-                    existe = True
-                    break
-                nodo_actual = nodo_actual.siguiente
+            elif opcion_2 == 2: #modificacion de hotel
+                print("\nSelecciono: Modificar hotel")
+                nodo_actual = lista_hoteles.inicio
+                while nodo_actual:
+                    nodo_actual = nodo_actual.siguiente
 
-            if existe:
-                lista_hoteles.eliminar(nombre_hotel_eliminar)
-            else:
-                print("\nNo existe")
+                nombre_hotel_modificar = input("\nIntroduzca el nombre del hotel a modificar: ")
+                if not nombre_hotel_modificar:
+                    raise ValueError("No se introdujo ningun nombre de hotel a modificar")
+                else:
+                    validar_nombre(nombre_hotel_modificar)
+                #Verificar si el hotel existe
+                existe = False
+                nodo_actual = lista_hoteles.inicio
+                while nodo_actual:
+                    if nodo_actual.hotel.nombre == nombre_hotel_modificar:
+                        existe = True
+                        break
+                    nodo_actual = nodo_actual.siguiente
 
-        elif opcion_2 == 5: #configuracion de habitaciones de hoteles
-            print("\nSelecciono: Configuracion de Habitaciones de Hoteles\n")
-            print("\nLista de Hoteles: ")
-            lista_hoteles.listar()
-            habitaciones_hotel_modificar = input("\nIntroduzca el nombre del hotel a modificar: ")
-
-            existe = False #verificar si el nombre del hotel existe
-            nodo_actual = lista_hoteles.inicio
-            while nodo_actual:
-                if nodo_actual.hotel.nombre == habitaciones_hotel_modificar:
-                    existe = True
-                    break
-                nodo_actual = nodo_actual.siguiente
-
-            if existe:
-                hotel = nodo_actual.hotel
-                habitaciones = ListaHabitaciones() #se instancia un objeto de la clase ListaHabitaciones()
-                habitaciones.cargar_desde_csv(habitaciones_hotel_modificar) #se cargan los registros de habitaciones y disponibilidades
-
-                while True:
-                    print("\nSeleccione una opcion: ")
-                    print("1. Crear habitacion")
-                    print("2. Modificar habitacion")
-                    print("3. Listar habitaciones")
-                    print("4. Consultar disponibilidad de una habitacion")
-                    print("5. Guardar cambios y volver")
-                    opcion = int(input())
-
-                    if opcion == 1: #creacion de habitacion
-                        numero_habitacion = int(input("Introduzca el numero de la habitacion: "))
-                        disponibilidad = input("Introduzca la disponibilidad (Disponible, No Disponible): ").lower()
-                        habitaciones.agregar_habitacion(numero_habitacion, disponibilidad)
-
-                    elif opcion == 2: #modificacion de habitacion    
-                        numero_habitacion = int(input("Introduzca el numero de la habitacion a modificar: "))
-                        disponibilidad = input("Introduzca la nueva disponibilidad (Disponible, No Disponible): ").lower()
-                        habitaciones.modificar_habitaciones(numero_habitacion, disponibilidad)
-
-                    elif opcion == 3: #impresion de habitaciones
-                        habitaciones.listar_habitaciones()
-
-                    elif opcion == 4: #consulta de disponibilidad
-                        numero_habitacion = int(input("Introduzca el numero de la habitacion a consultar: "))
-                        disponibilidad = habitaciones.consultar_disponibilidad(numero_habitacion)
-                        if disponibilidad is not None:
-                            print("La disponibilidad de la habitacion",numero_habitacion,"es",disponibilidad)
-                        else:
-                            print("No se encontro la habitacion numero",numero_habitacion)
-                    elif opcion == 5:
+                if existe:
+                    nueva_direccion = input("Introduce una nueva direccion: ")
+                    if not direccion:
+                        raise ValueError("No se introdujo ninguna direccion")
+                    else:
                         print("")
-                        #habitaciones.guardar_a_csv(hotel.nombre) #sobreescritura de csv de habitaciones
-            else:
-                print("Hotel no existente")            
-        elif opcion_2 == 6:
-            break
+                        print("Direccion Validada")
+                    nuevo_telefono = input("Introduce un nuevo numero telefonico: ")
+                    if not nuevo_telefono:
+                        raise ValueError("No se introdujo ningun numero telefonico")
+                    else:
+                        if validar_numero_telefonico(nuevo_telefono):
+                            print("Numero telefonico Validado")
+                        else:
+                            raise ValueError("Se introdujo un numero de telefono con el formato incorrecto")
+                    nuevo_habitaciones_disponibles = int(input("Introduce un nuevo numero de habitaciones disponibles: "))
+                    validar_habitaciones_disponibles(nuevo_habitaciones_disponibles)
+                    nuevo_nro_reservas = int(input("Introduce un nuevo numero de reservas disponibles: "))
+                    validar_reservaciones(nuevo_nro_reservas)
+
+                    lista_hoteles.modificar(nombre_hotel_modificar, nueva_direccion, nuevo_telefono,nuevo_habitaciones_disponibles, nuevo_nro_reservas)
+                    
+                    descripcion_registro = 'Se hizo la modificacion de manera exitosa sobre el hotel ',nombre_hotel_modificar
+                    elemento_registrado = registrar('Accion',descripcion_registro)
+                    pila_registros.apilar(elemento_registrado)
+                else:
+                    raise ValueError("El hotel a modificar no existe")
+
+            elif opcion_2 == 3: #listar hoteles
+                print("\nSelecciono: Listar hoteles\n")
+                lista_hoteles.listar()
+                descripcion_registro = 'Se listó los hoteles actuales'
+                elemento_registrado = registrar('Accion',descripcion_registro)
+                pila_registros.apilar(elemento_registrado)
+                
+            elif opcion_2 == 4: #eliminar hotel
+                print("\nSelecciono: Eliminar hoteles\n")
+                nombre_hotel_eliminar = input("\nIntroduzca el nombre del hotel a eliminar: ")
+                if not nombre_hotel_eliminar:
+                    raise ValueError("No se introdujo ningun nombre del hotel a eliminar")
+                else:
+                    validar_nombre(nombre)
+                #Verificar si el hotel existe
+                existe = False
+                nodo_actual = lista_hoteles.inicio
+                while nodo_actual:
+                    if nodo_actual.hotel.nombre == nombre_hotel_eliminar:
+                        existe = True
+                        break
+                    nodo_actual = nodo_actual.siguiente
+
+                if existe:
+                    lista_hoteles.eliminar(nombre_hotel_eliminar)
+                    descripcion_registro = 'Se eliminó el hotel ',nombre_hotel_eliminar
+                    elemento_registrado = registrar('Accion',descripcion_registro)
+                    pila_registros.apilar(elemento_registrado)
+                else:
+                    raise ValueError("El hotel a eliminar no existe")
+
+            elif opcion_2 == 5: #configuracion de habitaciones de hoteles
+                print("\nSelecciono: Configuracion de Habitaciones de Hoteles\n")
+                print("\nLista de Hoteles: ")
+                lista_hoteles.listar()
+                habitaciones_hotel_modificar = input("\nIntroduzca el nombre del hotel a modificar: ")
+                if not habitaciones_hotel_modificar:
+                    ValueError("No se introdujo ningun nombre de hotel a configurar")
+                else:
+                    validar_nombre(habitaciones_hotel_modificar)
+
+                existe = False #verificar si el nombre del hotel existe
+                nodo_actual = lista_hoteles.inicio
+                while nodo_actual:
+                    if nodo_actual.hotel.nombre == habitaciones_hotel_modificar:
+                        existe = True
+                        break
+                    nodo_actual = nodo_actual.siguiente
+                if existe:
+                    hotel = nodo_actual.hotel
+                    habitaciones = ListaHabitaciones() #se instancia un objeto de la clase ListaHabitaciones()
+                    habitaciones.cargar_desde_csv(habitaciones_hotel_modificar) #se cargan los registros de habitaciones y disponibilidades
+                    descripcion_registro = 'Se inicia una configuracion del hotel ',habitaciones_hotel_modificar
+                    elemento_registrado = registrar('Accion',descripcion_registro)
+                    pila_registros.apilar(elemento_registrado)
+                    while True:
+                        print("\nSeleccione una opcion: ")
+                        print("1. Crear habitacion")
+                        print("2. Modificar habitacion")
+                        print("3. Listar habitaciones")
+                        print("4. Consultar disponibilidad de una habitacion")
+                        print("5. Guardar cambios y volver")
+                        opcion = int(input())
+
+                        if opcion == 1: #creacion de habitacion
+                            numero_habitacion = int(input("Introduzca el numero de la habitacion: "))
+                            validar_numero_de_habitacion(numero_habitacion)
+                            disponibilidad = input("Introduzca la disponibilidad (Disponible, No Disponible): ").strip().lower()
+                            validar_disponibilidad(disponibilidad)
+                            habitaciones.agregar_habitacion(numero_habitacion, disponibilidad)
+                            descripcion_registro = 'Se creó una nueva habitacion del hotel ',habitaciones_hotel_modificar
+                            elemento_registrado = registrar('Accion',descripcion_registro)
+                            pila_registros.apilar(elemento_registrado)
+
+                        elif opcion == 2: #modificacion de habitacion    
+                            numero_habitacion = int(input("Introduzca el numero de la habitacion a modificar: "))
+                            validar_numero_de_habitacion(numero_habitacion)
+                            disponibilidad = input("Introduzca la nueva disponibilidad (Disponible, No Disponible): ").strip().lower()
+                            validar_disponibilidad(disponibilidad)
+                            habitaciones.modificar_habitaciones(numero_habitacion, disponibilidad)
+                            descripcion_registro = 'Se modifico la habitacion ',numero_habitacion,' del hotel ',habitaciones_hotel_modificar
+                            elemento_registrado = registrar('Accion',descripcion_registro)
+                            pila_registros.apilar(elemento_registrado)
+
+                        elif opcion == 3: #impresion de habitaciones
+                            habitaciones.listar_habitaciones()
+                            descripcion_registro = 'Se listaron las habitaciones del hotel ',habitaciones_hotel_modificar
+                            elemento_registrado = registrar('Accion',descripcion_registro)
+                            pila_registros.apilar(elemento_registrado)
+
+                        elif opcion == 4: #consulta de disponibilidad
+                            numero_habitacion = int(input("Introduzca el numero de la habitacion a consultar: "))
+                            validar_numero_de_habitacion(numero_habitacion)
+                            disponibilidad = habitaciones.consultar_disponibilidad(numero_habitacion)
+                            if disponibilidad is not None:
+                                print("La disponibilidad de la habitacion ",numero_habitacion," es ",disponibilidad)
+                                descripcion_registro = 'Se busco la disponibilidad de la habitacion numero ',numero_habitacion,' del hotel ',habitaciones_hotel_modificar
+                                elemento_registrado = registrar('Accion',descripcion_registro)
+                                pila_registros.apilar(elemento_registrado)
+                            else:
+                                raise ValueError("No se encontro la habitacion numero ",numero_habitacion)
+                        elif opcion == 5:
+                            print("")
+                            break
+                            #habitaciones.guardar_a_csv(hotel.nombre) #sobreescritura de csv de habitaciones
+                else:
+                    raise ValueError("El hotel a configurar no existe o se escribio de manera incorrecta.")      
+            elif opcion_2 == 6:
+                break
+        except Exception as e:
+            print("Error: ",e)
+            descripcion_registro = e
+            elemento_registrado = registrar('Error',descripcion_registro)
+            pila_registros.apilar(elemento_registrado)
 
 
 def gestionReservaciones():
-    while True:
-        archivo_reservaciones = input("\nIntroduzca el nombre del hotel para la configuracion de reservaciones: ")
-        archivo_reservas = f'reservaciones_{archivo_reservaciones}.csv'
-        lista_reservas = Reservaciones(archivo_reservas) #Se carga el archivo CSV de las reservaciones en una instancia de la clase Reservaciones()
-        lista = lista_reservas.cargar_datos()              
-        cola = ColaReservaciones() #se instancia objeto
-
-        for objeto in lista:
-            cola.encolar(objeto) #Se encolan los objetos de la clase Reservaciones
-
-        print("\nOpcion seleccionada: Gestion de Reservaciones\n")
-        print("\nSeleccione una opcion:")
-        print("1. Crear reservacion")
-        print("2. Modificar reservacion")
-        print("3. Listar reservaciones")
-        print("4. Eliminar reservacion")
-        print("5. Regresar")
-        accion = int(input())      
-
-        if accion == 1:
-            print("\nOpción seleccionada: Crear reservación\n")
-            print("Hotel selecionado (archivo): ",archivo_reservas)
-            nombre = input("Nombre del cliente: ")
-            fecha_reserva = input("Fecha de reserva (DD/MM/YYYY): ")
-            fecha_entrada = input("Fecha de entrada (DD/MM/YYYY): ")
-            fecha_salida = input("Fecha de salida (DD/MM/YYYY): ")
-            nro_habitacion = int(input("Número de habitación: "))
-            duracion_estadia = int(input("Duración de la estancia (en días): "))
-            tipo_habitacion = input("Tipo de habitación: ")
-            nro_personas = int(input("Número de personas: "))
-            telefono = input("Teléfono del cliente: ")
-            correo = input("Correo del cliente: ")
-            precio_total = float(input("Precio total: "))
-            id_reserva = input("ID de la reserva: ")
-
-            nueva_reservacion = Reservacion(nombre, fecha_reserva, fecha_entrada, fecha_salida, nro_habitacion,
-                                            duracion_estadia, tipo_habitacion, nro_personas, telefono, correo,
-                                            precio_total, id_reserva)
-
-            cola.encolar(nueva_reservacion) #Llamamos al método para encolar la nueva reservación
-            lista_reservas.guardar_csv(archivo_reservas, nueva_reservacion) #Se cambia el csv
-
-        elif accion == 2:
-            id_reserva_modificar = input("Introduce el ID de la reserva a modificar: ")
-
-            nuevo_nombre = input("Nombre del cliente: ")
-            nueva_fecha_reserva = input("Fecha de reserva (DD/MM/YYYY): ")
-            nueva_fecha_entrada = input("Fecha de entrada (DD/MM/YYYY): ")
-            nueva_fecha_salida = input("Fecha de salida (DD/MM/YYYY): ")
-            nuevo_nro_habitacion = int(input("Número de habitación: "))
-            nuevo_duracion_estadia = int(input("Duración de la estancia (en días): "))
-            nuevo_tipo_habitacion = input("Tipo de habitación: ")
-            nuevo_nro_personas = int(input("Número de personas: "))
-            nuevo_telefono = input("Teléfono del cliente: ")
-            nuevo_correo = input("Correo del cliente: ")
-            nuevo_precio_total = float(input("Precio total: "))
-
-            lista_reservas.modificar_reservacion(id_reserva_modificar, nuevo_nombre, nueva_fecha_reserva, nueva_fecha_entrada, 
-                                                    nueva_fecha_salida, nuevo_nro_habitacion, nuevo_duracion_estadia, 
-                                                    nuevo_tipo_habitacion, nuevo_nro_personas, nuevo_telefono, nuevo_correo, nuevo_precio_total)
-        elif accion == 3:
-
-            if not cola.esta_vacia():                
-                print("\nOpcion seleccionada: Listar reservaciones\n")
-                cola.imprimir()
+    try:
+        while True:
+            descripcion_registro = ''
+            archivo_reservaciones = input("\nIntroduzca el nombre del hotel para la configuracion de reservaciones: ")
+            if not archivo_reservaciones:
+                raise ValueError("No se introdujo ningun nombre de hotel")
             else:
-                print("No hay reservas")
+                validar_nombre(archivo_reservaciones)
+                archivo_reservas = f'reservaciones_{archivo_reservaciones}.csv'
+                lista_reservas = Reservaciones(archivo_reservas) #Se carga el archivo CSV de las reservaciones en una instancia de la clase Reservaciones()
+                lista = lista_reservas.cargar_datos()              
+                cola = ColaReservaciones() #se instancia objeto
+                print("")
+                print("Nombre       F. Reserva      F. Entrada     F. Salida    Nro. Habit    Dur. Est   T. Habit    Nro Pers.       Telef             Cont                   Precio T.     ID")
+                print("")
+                for objeto in lista:
+                    cola.encolar(objeto) #Se encolan los objetos de la clase Reservaciones
 
-        elif accion == 4:
+                print("\nOpcion seleccionada: Gestion de Reservaciones\n")
+                print("\nSeleccione una opcion:")
+                print("1. Crear reservacion")
+                print("2. Modificar reservacion")
+                print("3. Listar reservaciones")
+                print("4. Eliminar reservacion")
+                print("5. Regresar")
+                accion = int(input())      
 
-            print("\nOpcion seleccionada: Eliminar reservaciones\n")
-            id_a_eliminar = input("Introduzca el ID de la reserva a eliminar: ")
-            lista_reservas.eliminar_reservacion(id_a_eliminar)
+                if accion == 1:
+                    
+                    
+                    print("\nOpción seleccionada: Crear reservación\n")
+                    print("Hotel selecionado (archivo): ",archivo_reservas)
+                    nombre = input("Nombre del cliente: ")
+                    if not nombre:
+                        raise ValueError("No se introdujo ningun nombre")
+                    else:
+                        validar_nombre(nombre)
+                    fecha_reserva = input("Fecha de reserva (DD/MM/YYYY): ")
+                    if validar_fecha(fecha_reserva):
+                        print("Fecha de reserva validada")
+                        print("")
+                    else:
+                        raise ValueError("Se introdujo la fecha de reserva de manera incorrecta")
+                    fecha_entrada = input("Fecha de entrada (DD/MM/YYYY): ")
+                    if validar_fecha(fecha_entrada):
+                        print("Fecha de entrada validada")
+                        print("")
+                    else:
+                        raise ValueError("Se introdujo la fecha de entrada de manera incorrecta")
+                    fecha_salida = input("Fecha de salida (DD/MM/YYYY): ")
+                    if validar_fecha(fecha_salida):
+                        print("Fecha de salida validada")
+                        print("")
+                    else:
+                        raise ValueError("Se introdujo la fecha de salida de manera incorrecta")
+                    nro_habitacion = int(input("Número de habitación: "))
+                    validar_numero_de_habitacion(nro_habitacion)
+                    duracion_estadia = int(input("Duración de la estancia (en días): "))
+                    validar_estadia(duracion_estadia)
+                    tipo_habitacion = input("Tipo de habitación: ")
+                    if not tipo_habitacion:
+                        raise ValueError("No se introdujo ningun tipo de habitacion")
+                    else:
+                        validar_tipo_habitacion(tipo_habitacion)
+                    nro_personas = int(input("Número de personas: "))
+                    validar_nro_personas(nro_personas)
+                    telefono = input("Teléfono del cliente: ")
+                    if not telefono:
+                        raise ValueError("No se introdujo ningun numero telefonico")
+                    else:
+                        if validar_numero_telefonico(telefono):
+                            print("Numero telefonico Validado")
+                        else:
+                            raise ValueError("Se introdujo un numero de telefono con el formato incorrecto")
+                    correo = input("Correo del cliente: ")
+                    if validar_correo(correo):
+                        print("")
+                        print("Correo validado")
+                        print("")
+                    else:
+                        raise ValueError("El correo que se introdujo para crear una reservacion no fue validada")
+                    precio_total = float(input("Precio total: "))
+                    validar_precio(precio_total)
+                    id_reserva = input("ID de la reserva: ")
+                    validar_str_id(id_reserva)
 
-        elif accion == 5:
-            break
+                    descripcion_registro = 'Se creó exitosamente la reservacion en el hotel ',archivo_reservaciones
+                    elemento_registrado = registrar('Accion',descripcion_registro)
+                    pila_registros.apilar(elemento_registrado)
+
+                    nueva_reservacion = Reservacion(nombre, fecha_reserva, fecha_entrada, fecha_salida, nro_habitacion,
+                                                    duracion_estadia, tipo_habitacion, nro_personas, telefono, correo,
+                                                    precio_total, id_reserva)
+
+                    cola.encolar(nueva_reservacion) #Llamamos al método para encolar la nueva reservación
+                    lista_reservas.guardar_csv(archivo_reservas, nueva_reservacion) #Se cambia el csv
+
+                elif accion == 2:
+                    id_reserva_modificar = input("Introduce el ID de la reserva a modificar: ")
+                    if not id_reserva_modificar:
+                        raise ValueError("No se introdujo ningun id de la reserva modificar")
+                    else:
+                        validar_str_id(id_reserva_modificar)
+                    nuevo_nombre = input("Nombre del cliente: ")
+                    if not nuevo_nombre:
+                        raise ValueError("No se introdujo ningun nombre")
+                    else:
+                        validar_nombre(nombre)
+                    nueva_fecha_reserva = input("Fecha de reserva (DD/MM/YYYY): ")
+                    if not nueva_fecha_reserva:
+                        raise ValueError("No se introdujo ninguna fecha de reserva nueva")
+                    else:
+                        if validar_fecha(nueva_fecha_reserva):
+                            print("")
+                            print("Fecha validada")
+                        else:
+                            raise ValueError("Se introdujo una fecha de reserva nueva con el formato incorrecto")
+                    
+                    nueva_fecha_entrada = input("Fecha de entrada (DD/MM/YYYY): ")
+                    if not nueva_fecha_entrada:
+                        raise ValueError("No se introdujo ninguna fecha de entrada nueva")
+                    else:
+                        if validar_fecha(nueva_fecha_entrada):
+                            print("")
+                            print("Fecha validada")
+                        else:
+                            raise ValueError("Se introdujo una fecha de entrada nueva con el formato incorrecto")
+                    
+                    nueva_fecha_salida = input("Fecha de salida (DD/MM/YYYY): ")
+                    if not nueva_fecha_salida:
+                        raise ValueError("No se introdujo ninguna fecha de salida nueva")
+                    else:
+                        if validar_fecha(nueva_fecha_salida):
+                            print("")
+                            print("Fecha validada")
+                        else:
+                            raise ValueError("Se introdujo una fecha de salida nueva con el formato incorrecto")
+                    nuevo_nro_habitacion = int(input("Número de habitación: "))
+                    validar_numero_de_habitacion(nuevo_nro_habitacion)
+                    nuevo_duracion_estadia = int(input("Duración de la estancia (en días): "))
+                    validar_estadia(nuevo_duracion_estadia)
+                    nuevo_tipo_habitacion = input("Tipo de habitación: ")
+                    validar_tipo_habitacion(nuevo_tipo_habitacion)
+                    nuevo_nro_personas = int(input("Número de personas: "))
+                    validar_nro_personas(nuevo_nro_personas)
+                    nuevo_telefono = input("Teléfono del cliente: ")
+                    if not nuevo_telefono:
+                        raise ValueError("No se introdujo ningun numero telefonico")
+                    else:
+                        if validar_numero_telefonico(nuevo_telefono):
+                            print("Numero telefonico nuevo Validado")
+                        else:
+                            raise ValueError("Se introdujo un numero de telefono nuevo con el formato incorrecto")
+                    nuevo_correo = input("Correo del cliente: ")
+                    if validar_correo(nuevo_correo):
+                        print("")
+                        print("Nuevo correo validado")
+                        print("")
+                    else:
+                        raise ValueError("El correo que se introdujo para modificar una reservacion no fue validada")
+                    nuevo_precio_total = float(input("Precio total: "))
+                    validar_precio(nuevo_precio_total)
+                    descripcion_registro = 'Se modificó exitosamente la reservacion en el hotel ',archivo_reservaciones
+                    elemento_registrado = registrar('Accion',descripcion_registro)
+                    pila_registros.apilar(elemento_registrado)
+                    lista_reservas.modificar_reservacion(id_reserva_modificar, nuevo_nombre, nueva_fecha_reserva, nueva_fecha_entrada, 
+                                                            nueva_fecha_salida, nuevo_nro_habitacion, nuevo_duracion_estadia, 
+                                                            nuevo_tipo_habitacion, nuevo_nro_personas, nuevo_telefono, nuevo_correo, nuevo_precio_total)
+                elif accion == 3:
+
+                    if not cola.esta_vacia():                
+                        print("\nOpcion seleccionada: Listar reservaciones\n")
+                        print("Nombre       F. Reserva      F. Entrada     F. Salida    Nro. Habit    Dur. Est   T. Habit    Nro Pers.       Telef             Cont                   Precio T.     ID")
+                        print("")
+                        cola.imprimir()
+                        descripcion_registro = 'Se listaron las reservaciones creadas para el hotel ',archivo_reservaciones
+                        elemento_registrado = registrar('Accion',descripcion_registro)
+                        pila_registros.apilar(elemento_registrado)
+                    else:
+                        raise ValueError("No hubieron reservadas creadas")
+
+                elif accion == 4:
+
+                    print("\nOpcion seleccionada: Eliminar reservaciones\n")
+                    id_a_eliminar = input("Introduzca el ID de la reserva a eliminar: ")
+                    lista_reservas.eliminar_reservacion(id_a_eliminar)
+                    descripcion_registro = 'Se elimino exitosamente la reservacion en el hotel ',archivo_reservaciones
+                    elemento_registrado = registrar('Accion',descripcion_registro)
+                    pila_registros.apilar(elemento_registrado)
+
+                elif accion == 5:
+                    break
+    except Exception as e:
+        print("Error: ",e)
+        descripcion_registro = e
+        elemento_registrado = registrar('Error',descripcion_registro)
+        pila_registros.apilar(elemento_registrado)
 
 
-def logRegistrosyErrores():
-    return
+
+
+
+
+
 
 
 
 def main():
-
     archivo = 'hoteles.csv'
-    
+    # archivo_usado = 'log_registros.csv'
+    # eliminar_contenido_log(archivo_usado) Usado para borrar el contenido de los registros desde la ultima vez que se cerro el programa.
+    archivo_log = 'log_registros.csv'
     lista_hoteles = ListaHoteles() #instanciacion de un objeto de ListaHoteles()
     lista_hoteles.cargar_csv(archivo) #lectura del archivo.csv
-    
-    opcion = 0
-    
 
     while True:
-        print("\n****** BIENVENIDO AL SISTEMA DE GESTION DE HOTELERIA ******")
-        print("Seleccione una opcion")
-        print("1. Gestion de Hoteles")
-        print("2. Gestion de Reservaciones")
-        print("3. Modulo de Historial de Acciones")
-        print("4. Salir")
-        opcion = int(input())
+        try:
+            opcion = 0
+            print("\n****** BIENVENIDO AL SISTEMA DE GESTION DE HOTELERIA ******")
+            print("Seleccione una opcion")
+            print("1. Gestion de Hoteles")
+            print("2. Gestion de Reservaciones")
+            print("3. Modulo de Historial de Acciones")
+            print("4. Salir")
+            opcion = int(input())
 
-        if opcion == 1:
-            gestionHoteles(lista_hoteles)
+            if opcion == 1:
+                descripcion_registro = 'Se ingresó al modulo de Gestion de Hoteles'
+                elemento_registrado = registrar('Accion',descripcion_registro)
+                pila_registros.apilar(elemento_registrado)   
+                gestionHoteles(lista_hoteles)
 
-        elif opcion == 2:
-            gestionReservaciones()
+            elif opcion == 2:
+                descripcion_registro = 'Se ingresó al modulo de Gestion de Reservaciones'
+                elemento_registrado = registrar('Accion',descripcion_registro)
+                pila_registros.apilar(elemento_registrado)   
+                gestionReservaciones()
 
-        elif opcion == 3:
-            logRegistrosyErrores()
-        elif opcion == 4:
-            break            
-
-        ##lista_hoteles.actualizar_csv(archivo) #sobreescritura de csv de Hoteles                                                      
+            elif opcion == 3:
+                descripcion_registro = 'Se ingresó al modulo de registro de acciones y errores'
+                elemento_registrado = registrar('Accion',descripcion_registro)
+                pila_registros.apilar(elemento_registrado)
+                logRegistrosyErrores(pila_registros,pila_nueva,archivo_log)
+                
+            elif opcion == 4:
+                descripcion_registro = 'Se finalizó el programa'
+                elemento_registrado = registrar('Accion',descripcion_registro)
+                pila_registros.apilar(elemento_registrado)   
+                break  
+            else:
+                raise ValueError("Se introdujo una opcion inexistente en el modulo Main")
+            ##lista_hoteles.actualizar_csv(archivo) #sobreescritura de csv de Hoteles 
+        except Exception as e:
+            print("Error ",e)
+            descripcion_registro = e
+            elemento_registrado = registrar('Error',descripcion_registro)
+            pila_registros.apilar(elemento_registrado)                                                    
 main()
