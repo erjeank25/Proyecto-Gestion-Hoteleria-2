@@ -353,7 +353,8 @@ def gestionEmpleados(hotel):
             salario = float(input("Ingrese el salario del empleado: "))
             fecha_contratacion = input("Ingrese la fecha de contratacion (dd/mm/aaaa)")
             validarFecha(fecha_contratacion)
-            nuevo_empleado = Empleado(nombre, posicion, salario, fecha_contratacion)
+            fecha_contratacion_convertida = datetime.strptime(fecha_contratacion, '%d/%m/%Y')
+            nuevo_empleado = Empleado(nombre, posicion, salario, fecha_contratacion_convertida)
             arbol_empleados.agregar(nuevo_empleado)
 
         elif opcion == 2:
@@ -456,7 +457,7 @@ def estadisticaReportes(arbol_empleados, hotel, arbol_reserva, reserva):
             altura_inorden = arbol_empleados.altura_arbol_inorden()
             print("\nAltura del arbol (Inorden): ",altura_inorden)
 
-        if opcion == 2:
+        elif opcion == 2:
             print("\nLista de empleados por fecha de contratacion: ")
             empleados_antiguos = arbol_empleados.listar_fechas()
             if empleados_antiguos:
@@ -467,7 +468,7 @@ def estadisticaReportes(arbol_empleados, hotel, arbol_reserva, reserva):
             altura_preorden = arbol_empleados.altura_arbol_preorden()
             print("\nAltura del arbol (Inorden): ",altura_preorden)
 
-        if opcion == 3:
+        elif opcion == 3:
 
             print("\nHotel: ", reserva) #nombre del hotel
             for factura in facturas:
@@ -478,8 +479,9 @@ def estadisticaReportes(arbol_empleados, hotel, arbol_reserva, reserva):
             print("\nNumero de facturas en el arbol (Postorden): ", nodos_postorden) 
             print("Altura del arbol (Postorden): ", altura)
 
-        if opcion == 4:
+        elif opcion == 4:
             break
+
         else:
             raise ValueError("No se introdujo una opcion valida")            
  
