@@ -21,3 +21,26 @@ Este módulo utiliza una pila para registrar las acciones realizadas en el siste
 
 <h3>Las acciones de cada uno de los modulos, se guardarán en sus archivos respectivos, para mas detalles: <a href = "https://github.com/erjeank25/Proyecto-Gestion-Hoteleria-2">Ver repositorio</a></h3>
 
+# Proyecto-Gestion-Hoteleria 3
+<a href = "https://github.com/erjeank25/Proyecto-Gestion-Hoteleria-2/blob/secundaria/Proyecto-Hoteleria-3/3%20Proyecto%20Algoritmos.py">5ta Evaluacion de Algoritmos y Estructuras II.</a>
+
+<h2>¿En qué consiste?</h2>
+Se solicita crear un sistema avanzado de gestión de reservaciones que incluya funciones de ordenamiento y diversas características adicionales de la cadena de hoteles. El sistema permitirá a un hotel o servicio similar gestionar las reservaciones de manera eficiente, organizarlas según múltiples criterios y generar informes detallados.
+
+<h4>Este programa contendrá los siguientes modulos:</h4>
+
+<h2>Gestión de Empleados</h2>
+Por cada hotel, se utilizó un árbol binario para gestionar la información de los empleados(CRUDL) que trabajan en los diferentes hoteles de la cadena. Cada nodo representa un empleado y contendría datos como el nombre, la posición, el salario y la fecha de contratación. Este módulo facilita la asignación de tareas y la gestión de recursos humanos.
+
+<h2>Facturación de Pagos</h2>
+Se utilizó un árbol AVL para mantener un seguimiento de las facturas generadas para cada reserva. Cada nodo del árbol representa una factura y contendría detalles como el costo total, los servicios adicionales, el método de pago y el estado del pago. Este módulo permite generar facturas detalladas para los clientes y realizar un seguimiento de los pagos.
+
+<h2>Estadísticas y Reportes</h2>
+Se realizó los siguientes reportes:
+<ol>
+  <li>Facturación por Hotel y Mes: Mostrar los cinco empleados más antiguos. Muestra la altura del árbol (Recorrido inorden)</li>
+  <li>Lista todos los empleados existentes dado un hotel seleccionado y por fecha de contratación. Muestra altura del árbol (Recorrido en preorden)</li>
+  <li>Lista todas las facturas existentes por hotel y método de pago seleccionado. Muestra altura del árbol(Recorrido en postorden)</li>
+</ol>
+
+<h3>Para mas detalles del proyecto: <a href="https://github.com/erjeank25/Proyecto-Gestion-Hoteleria-2/tree/secundaria">Ver repositorio</a></h3>
