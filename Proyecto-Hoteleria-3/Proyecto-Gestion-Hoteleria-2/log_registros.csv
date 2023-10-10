@@ -1,0 +1,22 @@
+Tipo Accion;Detalles Adicionales;Fecha;Hora
+Accion;Se ingresó al modulo de registro de acciones y errores;27 de September de 2023;17:14:54
+Error;Se introdujo una fecha de reserva nueva con el formato incorrecto;27 de September de 2023;17:14:11
+Accion;('Se creó exitosamente la reservacion en el hotel ', 'Valencia');27 de September de 2023;17:12:19
+Accion;Se ingresó al modulo de Gestion de Reservaciones;27 de September de 2023;17:10:28
+Error;Se introdujo la fecha de reserva de manera incorrecta;27 de September de 2023;17:10:21
+Accion;Se ingresó al modulo de Gestion de Reservaciones;27 de September de 2023;17:09:56
+Error;Se introdujo la fecha de reserva de manera incorrecta;27 de September de 2023;17:09:49
+Accion;Se ingresó al modulo de Gestion de Reservaciones;27 de September de 2023;17:08:21
+Accion;('Se listaron las habitaciones del hotel ', 'Valencia');27 de September de 2023;17:06:57
+Accion;('Se modifico la habitacion ', 66, ' del hotel ', 'Valencia');27 de September de 2023;17:06:55
+Accion;('Se creó una nueva habitacion del hotel ', 'Valencia');27 de September de 2023;17:06:38
+Accion;('Se inicia una configuracion del hotel ', 'Valencia');27 de September de 2023;17:06:11
+Accion;Se listó los hoteles actuales;27 de September de 2023;17:05:44
+Accion;('Se eliminó el hotel ', 'Naguanagua');27 de September de 2023;17:05:40
+Accion;Se listó los hoteles actuales;27 de September de 2023;17:05:13
+Accion;('Se hizo la modificacion de manera exitosa sobre el hotel ', 'Naguanagua');27 de September de 2023;17:05:09
+Error;El hotel a modificar no existe;27 de September de 2023;17:04:39
+Accion;Se listó los hoteles actuales;27 de September de 2023;17:04:11
+Accion;('Se creó de manera exitosa el hotel ', 'Naguanagua');27 de September de 2023;17:03:39
+Error;Se introdujo un numero de telefono con el formato incorrecto;27 de September de 2023;17:03:03
+Accion;Se ingresó al modulo de Gestion de Hoteles;27 de September de 2023;17:02:03

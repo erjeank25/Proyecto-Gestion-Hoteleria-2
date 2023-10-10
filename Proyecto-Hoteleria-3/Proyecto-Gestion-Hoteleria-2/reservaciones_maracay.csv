@@ -1,0 +1,4 @@
+Nombre;Fecha Reserva;Fecha Entrada;Fecha Salida;Nro Habitacion;Duracion Estadia;Tipo Habitacion;Nro Personas;Telefono;Contacto;Precio Total;ID
+Maria;21/03/2023;23/03/2023;15/07/2023;8;15;King;3;0414-7894512;mariaperez@hotmail.com;5600;1045
+Ana;05/10/2023;15/10/2023;20/10/2023;5;5;Individual;2;0412-4572015;ana.lopez@gmail.com;750;5623
+Juan;20/09/2023;10/10/2023;15/10/2023;6;5;Doble Estandar;5;0424-5686598;j.perez@hotmail.com;4780;1748
