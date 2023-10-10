@@ -1,6 +1,7 @@
 import pickle #serializar y deserializar
 from datetime import datetime #manejo de fechas
 import shutil #mover librerias
+import re
 
 class NodoEmpleado: #Representa un empleado en un arbol binario
     def __init__(self, empleado):
@@ -310,6 +311,19 @@ class ArbolAVL:
 
 #Hasta aqui la clase ArbolAVL()      
 
+def validarCadena(cadena):
+    if cadena.isalpha():
+        print("Nombre validado")
+    else:
+        raise ValueError("Solo debe contener letras")
+
+def validarFecha(fecha):
+    patron = r"^\d{2}/\d{2}/\d{4}$"
+    if re.match(patron,fecha):
+        print("Fecha validada")
+    else:
+        raise ValueError("Formato de fecha invalida, intente de nuevo")
+
 #MODULO 1
 def gestionEmpleados(hotel):
 
@@ -333,15 +347,19 @@ def gestionEmpleados(hotel):
         if opcion == 1:
 
             nombre = input("\nIngrese el nombre del empleado: ")
+            validarCadena(nombre)
             posicion = input("Ingrese la posicion del empleado: ")
+            validarCadena(posicion)
             salario = float(input("Ingrese el salario del empleado: "))
             fecha_contratacion = input("Ingrese la fecha de contratacion (dd/mm/aaaa)")
+            validarFecha(fecha_contratacion)
             nuevo_empleado = Empleado(nombre, posicion, salario, fecha_contratacion)
             arbol_empleados.agregar(nuevo_empleado)
 
         elif opcion == 2:
 
             nombre_buscar = input("\nIngrese el nombre del empleado a buscar: ")
+            validarCadena(nombre_buscar)
             empleado_encontrado = arbol_empleados.leer(nombre_buscar)
             if empleado_encontrado:
                 print("\nEmpleado encontrado: ")
@@ -350,23 +368,27 @@ def gestionEmpleados(hotel):
                 print("Salario:",empleado_encontrado.salario)
                 print("Fecha de contratacion:", empleado_encontrado.fecha_contratacion.strftime('%d/%m/%Y'))
             else:
-                print("\nEmpleado no encontrado")
+                raise ValueError("\nEmpleado no encontrado")
 
         elif opcion == 3:
 
             nombre_modificar = input("\nIngrese el nombre del empleado a modificar: ")
-            nueva_posicon = input("Ingrese la nueva posicion del empleado: ")
-            nuevo_salario = input("Ingrese el nuevo salario del empleado: ")
+            validarCadena(nombre_modificar)
+            nueva_posicion = input("Ingrese la nueva posicion del empleado: ")
+            validarCadena(nueva_posicion)
+            nuevo_salario = float(input("Ingrese el nuevo salario del empleado: "))
             nueva_fecha_contratacion = input("Ingrese la nueva fecha de contratacion (dd/mm/aaaa): ")
-            empleado_modificado = arbol_empleados.modificar(nombre_modificar, nueva_posicon, nuevo_salario, nueva_fecha_contratacion)
+            validarFecha(nueva_fecha_contratacion)
+            empleado_modificado = arbol_empleados.modificar(nombre_modificar, nueva_posicion, nuevo_salario, nueva_fecha_contratacion)
             if empleado_modificado:
                 print("\nEmpleado modificado con exito")
             else:
-                print("No se pudo modificar el empleado")
+                raise ValueError("No se pudo modificar el empleado")
 
         elif opcion == 4: 
 
             nombre_eliminar = input("\nIngrese el nombre del empleado a eliminar: ")
+            validarCadena(nombre_eliminar)
             arbol_empleados.eliminar(nombre_eliminar)
             empleados = [empleado for empleado in empleados if empleado.nombre != nombre_eliminar]
             print("\nEmpleado eliminado con exito.")
@@ -383,7 +405,7 @@ def gestionEmpleados(hotel):
             arbol_empleados.actualizar_txt(hotel)
             break
         else:
-            print("Opcion no valida")                       
+            raise ValueError("Opcion no valida, intente de nuevo")                       
 
 #MODULO 2
 def facturacionPagos(reservas):
@@ -459,10 +481,9 @@ def estadisticaReportes(arbol_empleados, hotel, arbol_reserva, reserva):
         if opcion == 4:
             break
         else:
-            print("No se introdujo una opcion valida")            
+            raise ValueError("No se introdujo una opcion valida")            
  
-def configuracion():
-    print()    
+  
 
 def main():
 
@@ -475,97 +496,108 @@ def main():
     reservas_caracas = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\reservas_caracas.txt'
 
     while True:
+        try:
+            print("\n***** BIENVENIDO AL SISTEMA DE GESTION DE HOTELERIA ******")
+            print("1. Gestion de Empleados")
+            print("2. Modulo de Facturación y Pagos")
+            print("3. Modulo de Estadística y Reportes")
+            print("4. Archivo de Configuracion")
+            print("5. Salir")
+            opcion = int(input("Seleccione una opcion: "))
 
-        print("\n***** BIENVENIDO AL SISTEMA DE GESTION DE HOTELERIA ******")
-        print("1. Gestion de Empleados")
-        print("2. Modulo de Facturación y Pagos")
-        print("3. Modulo de Estadística y Reportes")
-        print("4. Archivo de Configuracion")
-        print("5. Salir")
-        opcion = int(input("Seleccione una opcion: "))
+            if opcion == 1:
+                print("\nSeleccione un hotel:")
+                print("1. Valencia")
+                print("2. Margarita")
+                print("3. Caracas")
+                eleccion = int(input("Seleccione una opcion: "))
+                if eleccion == 1:
+                    gestionEmpleados(valencia)
+                elif eleccion == 2:
+                    gestionEmpleados(margarita)
+                elif eleccion == 3:
+                    gestionEmpleados(caracas)
+                else:
+                    raise ValueError("Se introdujo una opcion invalida")
+                                                    
+            elif opcion == 2:
+                print("\nSeleccione un hotel:")
+                print("1. Valencia")
+                print("2. Margarita")
+                print("3. Caracas")
+                eleccion = int(input("Seleccione una opcion: "))
+                if eleccion == 1:
+                    facturacionPagos(reservas_valencia)
+                elif eleccion == 2:
+                    facturacionPagos(reservas_margarita)
+                elif eleccion == 3:
+                    facturacionPagos(reservas_caracas)
+                else:
+                    raise ValueError("Se introdujo una opcion invalida")       
 
-        if opcion == 1:
-            print("\nSeleccione un hotel:")
-            print("1. Valencia")
-            print("2. Margarita")
-            print("3. Caracas")
-            eleccion = int(input("Seleccione una opcion: "))
-            if eleccion == 1:
-                gestionEmpleados(valencia)
-            elif eleccion == 2:
-                gestionEmpleados(margarita)
-            elif eleccion == 3:
-                gestionEmpleados(caracas)
-                                              
-        elif opcion == 2:
-            print("\nSeleccione un hotel:")
-            print("1. Valencia")
-            print("2. Margarita")
-            print("3. Caracas")
-            eleccion = int(input("Seleccione una opcion: "))
-            if eleccion == 1:
-                facturacionPagos(reservas_valencia)
-            elif eleccion == 2:
-                facturacionPagos(reservas_margarita)
-            elif eleccion == 3:
-                facturacionPagos(reservas_caracas)           
+            elif opcion == 3:
+                print("\nSeleccione un hotel:")
+                print("1. Valencia")
+                print("2. Margarita")
+                print("3. Caracas")
+                eleccion = int(input("Seleccione una opcion: "))
+                if eleccion == 1:
+                    estadisticaReportes(ArbolEmpleados(), valencia, ArbolAVL(), reservas_valencia)
+                elif eleccion == 2:
+                    estadisticaReportes(ArbolEmpleados(), margarita, ArbolAVL(), reservas_margarita)
+                elif eleccion == 3:
+                    estadisticaReportes(ArbolEmpleados(), caracas, ArbolAVL(), reservas_caracas)
+                else:
+                    raise ValueError("Se introdujo una opcion invalida")
 
-        elif opcion == 3:
-            print("\nSeleccione un hotel:")
-            print("1. Valencia")
-            print("2. Margarita")
-            print("3. Caracas")
-            eleccion = int(input("Seleccione una opcion: "))
-            if eleccion == 1:
-                estadisticaReportes(ArbolEmpleados(), valencia, ArbolAVL(), reservas_valencia)
-            elif eleccion == 2:
-                estadisticaReportes(ArbolEmpleados(), margarita, ArbolAVL(), reservas_margarita)
-            elif eleccion == 3:
-                estadisticaReportes(ArbolEmpleados(), caracas, ArbolAVL(), reservas_caracas)
+            elif opcion == 4:
 
-        elif opcion == 4:
+                print("1. Cambiar a Proyecto 2")
+                print("2. Cambiar a Proyecto 3")
+                eleccion = int(input("Elija una opcion: "))
 
-            print("Cambiar a Proyecto 2")
-            print("Cambiar a Proyecto 3")
-            eleccion = int(input("Elija una opcion: "))
+                if eleccion == 1:
+                    valencia = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\valencia.txt'
+                    margarita = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\margarita.txt'
+                    caracas = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\caracas.txt'
 
-            if eleccion == 1:
-                valencia = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\valencia.txt'
-                margarita = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\margarita.txt'
-                caracas = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\caracas.txt'
+                    reservas_valencia = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\reservas_valencia.txt'
+                    reservas_margarita = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\reservas_margarita.txt'
+                    reservas_caracas = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\reservas_caracas.txt'
+                
+                elif eleccion == 2:
 
-                reservas_valencia = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\reservas_valencia.txt'
-                reservas_margarita = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\reservas_margarita.txt'
-                reservas_caracas = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\reservas_caracas.txt'
-            
-            elif eleccion == 2:
+                    origen_1 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\valencia.txt'
+                    origen_2 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\margarita.txt'
+                    origen_3 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\caracas.txt'
+                    origen_4 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\reservas_valencia.txt'
+                    origen_5 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\reservas_margarita.txt'
+                    origen_6 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\reservas_caracas.txt'
 
-                origen_1 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\valencia.txt'
-                origen_2 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\margarita.txt'
-                origen_3 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\caracas.txt'
-                origen_4 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\reservas_valencia.txt'
-                origen_5 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\reservas_margarita.txt'
-                origen_6 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\reservas_caracas.txt'
+                    destino_1 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\Proyecto-Hoteleria-3\valencia.txt'
+                    destino_2 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\Proyecto-Hoteleria-3\margarita.txt'
+                    destino_3 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\Proyecto-Hoteleria-3\caracas.txt'
+                    destino_4 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\Proyecto-Hoteleria-3\reservas_valencia.txt'
+                    destino_5 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\Proyecto-Hoteleria-3\reservas_margarita.txt'
+                    destino_6 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\Proyecto-Hoteleria-3\reservas_caracas.txt'
 
-                destino_1 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\Proyecto-Hoteleria-3\valencia.txt'
-                destino_2 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\Proyecto-Hoteleria-3\margarita.txt'
-                destino_3 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\Proyecto-Hoteleria-3\caracas.txt'
-                destino_4 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\Proyecto-Hoteleria-3\reservas_valencia.txt'
-                destino_5 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\Proyecto-Hoteleria-3\reservas_margarita.txt'
-                destino_6 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\Proyecto-Hoteleria-3\reservas_caracas.txt'
+                    shutil.copy(origen_1, destino_1)
+                    shutil.copy(origen_2, destino_2)
+                    shutil.copy(origen_3, destino_3)
+                    shutil.copy(origen_4, destino_4)
+                    shutil.copy(origen_5, destino_5)
+                    shutil.copy(origen_6, destino_6)
 
-                shutil.copy(origen_1, destino_1)
-                shutil.copy(origen_2, destino_2)
-                shutil.copy(origen_3, destino_3)
-                shutil.copy(origen_4, destino_4)
-                shutil.copy(origen_5, destino_5)
-                shutil.copy(origen_6, destino_6)
+                    print("Archivo movidos exitosamente")
+                
+                else:
+                    raise ValueError("Se introdujo una opcion invalida")
 
-                print("Archivo movidos exitosamente")
+            elif opcion == 5:
+                break
 
-        elif opcion == 5:
-            break
-
-        else:
-            print("Se introdujo una opcion erronea")                                          
+            else:
+                raise ValueError("Se introdujo una opcion erronea")
+        except Exception as e:
+            print("Error: ",e)                                          
 main()            
