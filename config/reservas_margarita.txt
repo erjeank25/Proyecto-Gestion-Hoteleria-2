@@ -1,0 +1,11 @@
+Factura Nro (ID);CostoTotal;ServiciosAdicionales;MetodoPago;EstadoPago
+170;Room service;Efectivo;Aprobado
+220;Masajes;Tarjeta;Aprobado
+130;Canguro;Efectivo;No aprobado
+190;Minibar;Tarjeta;Aprobado
+270;Sauna;Transferencia;Aprobado
+110;Internet;Efectivo;Aprobado
+240;Spa;Tarjeta;No aprobado
+200;Limpieza;Transferencia;Aprobado
+160;Parking;Efectivo;Aprobado
+250;Excursion;Tarjeta;No aprobado

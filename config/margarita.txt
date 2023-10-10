@@ -1,0 +1,11 @@
+Nombre;Posicion;Salario;FechaContratacion
+Ava;Analista;46000.0;2021-06-19 00:00:00
+Emma;Desarrollador;39000.0;2020-12-14 00:00:00
+Grace;Analista;48000.0;2020-05-30 00:00:00
+Jackson;Contador;43000.0;2019-12-11 00:00:00
+Liam;Gerente;52000.0;2021-09-07 00:00:00
+Logan;Programador;42000.0;2022-10-20 00:00:00
+Lucas;Ingeniero;49000.0;2020-04-12 00:00:00
+Mia;Diseñador;37000.0;2022-10-05 00:00:00
+Noah;Recepcionista;31000.0;2022-03-23 00:00:00
+Sophie;Asistente;33000.0;2021-07-01 00:00:00

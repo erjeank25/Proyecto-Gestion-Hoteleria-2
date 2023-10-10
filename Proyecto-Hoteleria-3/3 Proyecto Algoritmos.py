@@ -1,5 +1,6 @@
 import pickle #serializar y deserializar
 from datetime import datetime #manejo de fechas
+import shutil #mover librerias
 
 class NodoEmpleado: #Representa un empleado en un arbol binario
     def __init__(self, empleado):
@@ -50,7 +51,7 @@ class ArbolEmpleados: #Metodos a implementar en 1er modulo
         with open(archivo, 'w') as f:
             f.write("Nombre;Posicion;Salario;FechaContratacion\n")
             for empleado in empleados:
-                f.write(f"{empleado.nombre};{empleado.posicion};{empleado.salario};{empleado.fecha_contratacion}\n")                 
+                f.write(f"{empleado.nombre};{empleado.posicion};{empleado.salario};{empleado.fecha_contratacion.strftime('%d/%m/%Y')}\n")                 
 
     #CREATE
     def agregar(self, empleado): #agrega un empleado al arbol
@@ -465,13 +466,13 @@ def configuracion():
 
 def main():
 
-    valencia ='valencia.txt'
-    margarita = 'margarita.txt'
-    caracas = 'caracas.txt'
+    valencia =r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\valencia.txt'
+    margarita = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\margarita.txt'
+    caracas = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\caracas.txt'
 
-    reservas_valencia = 'reservas_valencia.txt'
-    reservas_margarita = 'reservas_margarita.txt'
-    reservas_caracas = 'reservas_caracas.txt'
+    reservas_valencia = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\reservas_valencia.txt'
+    reservas_margarita = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\reservas_margarita.txt'
+    reservas_caracas = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\reservas_caracas.txt'
 
     while True:
 
@@ -503,11 +504,11 @@ def main():
             print("3. Caracas")
             eleccion = int(input("Seleccione una opcion: "))
             if eleccion == 1:
-                facturacionPagos('reservas_valencia.txt')
+                facturacionPagos(reservas_valencia)
             elif eleccion == 2:
-                facturacionPagos('reservas_margarita.txt')
+                facturacionPagos(reservas_margarita)
             elif eleccion == 3:
-                facturacionPagos('reservas_caracas.txt')           
+                facturacionPagos(reservas_caracas)           
 
         elif opcion == 3:
             print("\nSeleccione un hotel:")
@@ -523,7 +524,44 @@ def main():
                 estadisticaReportes(ArbolEmpleados(), caracas, ArbolAVL(), reservas_caracas)
 
         elif opcion == 4:
-            configuracion() 
+
+            print("Cambiar a Proyecto 2")
+            print("Cambiar a Proyecto 3")
+            eleccion = int(input("Elija una opcion: "))
+
+            if eleccion == 1:
+                valencia = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\valencia.txt'
+                margarita = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\margarita.txt'
+                caracas = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\caracas.txt'
+
+                reservas_valencia = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\reservas_valencia.txt'
+                reservas_margarita = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\reservas_margarita.txt'
+                reservas_caracas = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\reservas_caracas.txt'
+            
+            elif eleccion == 2:
+
+                origen_1 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\valencia.txt'
+                origen_2 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\margarita.txt'
+                origen_3 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\caracas.txt'
+                origen_4 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\reservas_valencia.txt'
+                origen_5 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\reservas_margarita.txt'
+                origen_6 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\config\reservas_caracas.txt'
+
+                destino_1 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\Proyecto-Hoteleria-3\valencia.txt'
+                destino_2 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\Proyecto-Hoteleria-3\margarita.txt'
+                destino_3 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\Proyecto-Hoteleria-3\caracas.txt'
+                destino_4 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\Proyecto-Hoteleria-3\reservas_valencia.txt'
+                destino_5 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\Proyecto-Hoteleria-3\reservas_margarita.txt'
+                destino_6 = r'C:\Users\jodri\OneDrive\Documents\GitHub\Proyecto-Gestion-Hoteleria-2\Proyecto-Hoteleria-3\reservas_caracas.txt'
+
+                shutil.copy(origen_1, destino_1)
+                shutil.copy(origen_2, destino_2)
+                shutil.copy(origen_3, destino_3)
+                shutil.copy(origen_4, destino_4)
+                shutil.copy(origen_5, destino_5)
+                shutil.copy(origen_6, destino_6)
+
+                print("Archivo movidos exitosamente")
 
         elif opcion == 5:
             break

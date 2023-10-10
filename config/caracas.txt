@@ -1,0 +1,11 @@
+Nombre;Posicion;Salario;FechaContratacion
+William;Gerente;54000;11/08/2021
+Isabella;Desarrollador;38000;24/12/2020
+James;Recepcionista;32000;15/03/2022
+Sophia;Analista;47000;30/06/2021
+Oliver;Ingeniero;50000;22/04/2020
+Amelia;Diseñador;36000;10/11/2022
+Benjamin;Contador;44000;17/12/2019
+Emily;Asistente;34000;05/07/2021
+Lucas;Programador;43000;22/10/2022
+Avery;Analista;49000;05/06/2020

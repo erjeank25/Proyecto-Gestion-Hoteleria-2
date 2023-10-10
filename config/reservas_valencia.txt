@@ -1,0 +1,11 @@
+CostoTotal;ServiciosAdicionales;MetodoPago;EstadoPago
+100;Seguro;Tarjeta;Aprobado
+75;Limpieza;Efectivo;Aprobado
+200;Wifi;Transferencia;No aprobado
+150;Parking;Cheque;Aprobado
+180;Lavanderia;Tarjeta;No aprobado
+120;Spa;Efectivo;Aprobado
+90;Gimnasio;Tarjeta;Aprobado
+300;Restaurante;Transferencia;No aprobado
+250;Excursion;Efectivo;Aprobado
+140;Minibar;Tarjeta;Aprobado
